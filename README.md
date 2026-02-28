@@ -22,6 +22,8 @@ AOMOZ BY MONIRA
 │  │  ├─ versace.png
 │  │  └─ ysl.png
 │  ├─ hero-saree.jpg
+│  ├─ salwar-banner.jpg
+│  ├─ saree-banner.jpg
 │  └─ videos
 │     └─ about.mp4
 ├─ README.md
@@ -34,6 +36,8 @@ AOMOZ BY MONIRA
    │  │  │  └─ [...nextauth]
    │  │  │     ├─ authOptions.js
    │  │  │     └─ route.js
+   │  │  ├─ create-admin
+   │  │  │  └─ route.js
    │  │  ├─ orders
    │  │  │  └─ route.js
    │  │  ├─ payment
@@ -118,12 +122,12 @@ AOMOZ BY MONIRA
    │  ├─ AppContext.js
    │  ├─ layout
    │  │  ├─ AboutSection.js
+   │  │  ├─ CategoryProductRow.jsx
+   │  │  ├─ CategoryShowcase.js
    │  │  ├─ Footer.js
    │  │  ├─ Header.js
    │  │  ├─ Hero.js
-   │  │  ├─ products.js
-   │  │  ├─ Testimonials.js
-   │  │  └─ WhyChoose.js
+   │  │  └─ products.js
    │  └─ products
    │     ├─ AdminProductForm.jsx
    │     ├─ Pagination.jsx

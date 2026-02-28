@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import AboutSection from "@/components/layout/AboutSection";
 import ProductSection from "@/components/layout/products";
 import Hero from "@/components/layout/Hero";
-import WhyChoose from "@/components/layout/WhyChoose";
+import CategoryProductRow from "@/components/layout/CategoryProductRow";
 import CategoryShowcase from "@/components/layout/CategoryShowcase";
 
 
@@ -24,8 +24,20 @@ export default function Home() {
       <Hero/>
       <CategoryShowcase/>
       <ProductSection products={products}/>
+      <CategoryProductRow
+        title="Saree Collection"
+        banner="/saree-banner.jpg"
+        categorySlug="saree"
+      />
+
+      {/* Salwar Kamiz Section */}
+      <CategoryProductRow
+        title="Salwar Kamiz Collection"
+        banner="/salwar-banner.jpg"
+        categorySlug="salwar-kamiz"
+      />
       <AboutSection/>
-      <WhyChoose/>
+
 
     </>
   );
