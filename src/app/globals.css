@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+:root {
+  /* Background */
+  --color-bg-primary: #F7F7F5;
+  --color-bg-secondary: #FFFFFF;
+  --color-bg-accent: #F1EFEA;
+
+  /* Brand Green */
+  --color-primary: #1F6F43;
+  --color-primary-hover: #185A36;
+  --color-primary-light: #4FA36C;
+
+  /* Luxury Gold */
+  --color-accent: #C9A227;
+  --color-accent-hover: #A8841E;
+
+  /* Text */
+  --color-text-primary: #1A1A1A;
+  --color-text-secondary: #555555;
+  --color-text-muted: #888888;
+
+  /* Border */
+  --color-border: #E5E5E5;
+}
