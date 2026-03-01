@@ -4,10 +4,7 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useCart } from "@/context/CartContext";
-<<<<<<< HEAD
 import Image from "next/image";
-=======
->>>>>>> f3300f327d0f341b4adc5a8ea25fa5d740a3a0e3
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -37,19 +34,12 @@ export default function Navbar() {
           
           {/* LOGO + STYLISH HEADING */}
           <Link href="/" className="flex items-center gap-3 group flex-shrink-0 hover:scale-105 transition">
-<<<<<<< HEAD
             <Image
               src="/AOMOZ BY MONIRA.png"
               alt="AOMOZ BY MONIRA"
               width={120}
               height={40}
               className="h-8 sm:h-10 w-auto object-contain group-hover:scale-105 transition"
-=======
-            <img
-              src="/AOMOZ BY MONIRA.png"
-              alt="AOMOZ BY MONIRA"
-              className="h-8 sm:h-10 w-auto object-contain"
->>>>>>> f3300f327d0f341b4adc5a8ea25fa5d740a3a0e3
             />
             <div className="flex flex-col">
               <span className="text-lg sm:text-xl font-serif font-bold text-gray-900 tracking-tight leading-none">
@@ -61,32 +51,19 @@ export default function Navbar() {
             </div>
           </Link>
 
-<<<<<<< HEAD
           {/* DESKTOP MENU - FIXED ROUTING */}
-=======
-          {/* DESKTOP MENU */}
->>>>>>> f3300f327d0f341b4adc5a8ea25fa5d740a3a0e3
           <ul className="
             hidden lg:flex items-center gap-6 xl:gap-8
             text-sm font-semibold
             tracking-wide
           ">
             <li><Link href="/" className="text-gray-700 hover:text-[#D4AF37] transition py-2 font-semibold">Home</Link></li>
-<<<<<<< HEAD
             <li><Link href="/products" className="text-gray-700 hover:text-[#D4AF37] transition py-2 font-semibold">Shop</Link></li>
             <li><Link href="/products?category=saree" className="text-gray-700 hover:text-[#D4AF37] transition py-2 font-semibold">Saree</Link></li>
             <li><Link href="/products?category=salwar-kamiz" className="text-gray-700 hover:text-[#D4AF37] transition py-2 font-semibold">Salwar Kamiz</Link></li>
             <li><Link href="/about" className="text-gray-700 hover:text-[#D4AF37] transition py-2 font-semibold">About</Link></li>
             <li><Link href="/contact" className="text-gray-700 hover:text-[#D4AF37] transition py-2 font-semibold">Contact</Link></li>
             {session && <li><Link href="/orders" className="text-gray-700 hover:text-[#D4AF37] transition py-2 font-semibold">Orders</Link></li>}
-=======
-            <li><span className="py-2 text-gray-500 opacity-75 cursor-not-allowed">Shop</span></li>
-            <li><span className="py-2 text-gray-500 opacity-75 cursor-not-allowed">Saree</span></li>
-            <li><span className="py-2 text-gray-500 opacity-75 cursor-not-allowed">Salwar Kamiz</span></li>
-            <li><span className="py-2 text-gray-500 opacity-75 cursor-not-allowed">About</span></li>
-            <li><span className="py-2 text-gray-500 opacity-75 cursor-not-allowed">Contact</span></li>
-            {session && <li><span className="py-2 text-gray-500 opacity-75 cursor-not-allowed">Orders</span></li>}
->>>>>>> f3300f327d0f341b4adc5a8ea25fa5d740a3a0e3
           </ul>
 
           {/* RIGHT SIDE - Desktop */}
@@ -95,13 +72,8 @@ export default function Navbar() {
             {/* LOGIN/REGISTER - Desktop (when NO session) */}
             {!session && (
               <div className="flex items-center gap-3 text-sm">
-<<<<<<< HEAD
                 <Link href="/login" className="font-medium py-2 hover:text-[#D4AF37] transition">Login</Link>
                 <Link href="/register" className="font-medium py-2 hover:text-[#D4AF37] transition">Register</Link>
-=======
-                <span className="font-medium py-2 opacity-75 cursor-not-allowed">Login</span>
-                <span className="font-medium py-2 opacity-75 cursor-not-allowed">Register</span>
->>>>>>> f3300f327d0f341b4adc5a8ea25fa5d740a3a0e3
               </div>
             )}
 
@@ -136,21 +108,12 @@ export default function Navbar() {
               </div>
             )}
 
-<<<<<<< HEAD
             {/* CART */}
             {mounted && !isAdmin && (
               <Link href="/cart" className="relative p-2 hover:scale-110 transition group">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6 text-gray-700 group-hover:text-[#D4AF37] transition"
-=======
-            {/* CART - DISABLED */}
-            {mounted && !isAdmin && (
-              <div className="relative p-2 cursor-not-allowed opacity-50">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-gray-500"
->>>>>>> f3300f327d0f341b4adc5a8ea25fa5d740a3a0e3
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={1.7}
@@ -161,19 +124,11 @@ export default function Navbar() {
                   />
                 </svg>
                 {cartCount > 0 && (
-<<<<<<< HEAD
                   <span className="absolute -top-1 -right-1 bg-[#D4AF37] text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full text-[10px]">
                     {cartCount}
                   </span>
                 )}
               </Link>
-=======
-                  <span className="absolute -top-1 -right-1 bg-gray-400 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full text-[10px]">
-                    {cartCount}
-                  </span>
-                )}
-              </div>
->>>>>>> f3300f327d0f341b4adc5a8ea25fa5d740a3a0e3
             )}
           </div>
 
@@ -192,7 +147,6 @@ export default function Navbar() {
         {/* MOBILE MENU */}
         {mobileOpen && (
           <div className="lg:hidden bg-white/95 backdrop-blur-xl border-t border-gray-200 px-4 sm:px-6 py-6 space-y-2 shadow-2xl">
-<<<<<<< HEAD
             {/* Mobile Nav Links - FIXED ROUTING */}
             <Link href="/" onClick={() => setMobileOpen(false)} className="block py-3 px-4 rounded-lg hover:bg-gray-100 font-semibold text-gray-800 text-base">Home</Link>
             <Link href="/products" onClick={() => setMobileOpen(false)} className="block py-3 px-4 rounded-lg hover:bg-gray-100 font-semibold text-gray-800 text-base">Shop</Link>
@@ -200,15 +154,6 @@ export default function Navbar() {
             <Link href="/products?category=salwar-kamiz" onClick={() => setMobileOpen(false)} className="block py-3 px-4 rounded-lg hover:bg-gray-100 font-semibold text-gray-800 text-base">Salwar Kamiz</Link>
             <Link href="/about" onClick={() => setMobileOpen(false)} className="block py-3 px-4 rounded-lg hover:bg-gray-100 font-semibold text-gray-800 text-base">About</Link>
             <Link href="/contact" onClick={() => setMobileOpen(false)} className="block py-3 px-4 rounded-lg hover:bg-gray-100 font-semibold text-gray-800 text-base">Contact</Link>
-=======
-            {/* Mobile Nav Links */}
-            <Link href="/" onClick={() => setMobileOpen(false)} className="block py-3 px-4 rounded-lg hover:bg-gray-100 font-semibold text-gray-800 text-base">Home</Link>
-            <span className="block py-3 px-4 rounded-lg opacity-75 font-semibold text-gray-500 text-base cursor-not-allowed">Shop</span>
-            <span className="block py-3 px-4 rounded-lg opacity-75 font-semibold text-gray-500 text-base cursor-not-allowed">Saree</span>
-            <span className="block py-3 px-4 rounded-lg opacity-75 font-semibold text-gray-500 text-base cursor-not-allowed">Salwar Kamiz</span>
-            <span className="block py-3 px-4 rounded-lg opacity-75 font-semibold text-gray-500 text-base cursor-not-allowed">About</span>
-            <span className="block py-3 px-4 rounded-lg opacity-75 font-semibold text-gray-500 text-base cursor-not-allowed">Contact</span>
->>>>>>> f3300f327d0f341b4adc5a8ea25fa5d740a3a0e3
 
             {/* MOBILE USER SECTION */}
             {session ? (
@@ -238,13 +183,8 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex flex-col gap-2 pt-4 border-t border-gray-200">
-<<<<<<< HEAD
                 <Link href="/login" onClick={() => setMobileOpen(false)} className="py-3 px-4 font-semibold text-gray-800 text-base hover:bg-gray-100 rounded-lg">Login</Link>
                 <Link href="/register" onClick={() => setMobileOpen(false)} className="py-3 px-4 font-semibold text-gray-800 text-base hover:bg-gray-100 rounded-lg">Register</Link>
-=======
-                <span className="py-3 px-4 opacity-75 font-semibold text-gray-500 text-base cursor-not-allowed">Login</span>
-                <span className="py-3 px-4 opacity-75 font-semibold text-gray-500 text-base cursor-not-allowed">Register</span>
->>>>>>> f3300f327d0f341b4adc5a8ea25fa5d740a3a0e3
               </div>
             )}
           </div>
