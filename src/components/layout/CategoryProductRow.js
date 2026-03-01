@@ -57,7 +57,7 @@ export default function CategoryProductRow({
 
 
   return (
-    <section className="bg-[var(--color-bg-primary)] py-16 px-4">
+    <section className="bg-[var(--color-bg-primary)] py-16 px-3 sm:px-4">
 
       <div className="max-w-7xl mx-auto">
 
@@ -76,14 +76,15 @@ export default function CategoryProductRow({
           </p>
         </div>
 
-        <div className="
-          bg-white
-          rounded-2xl
-          border border-[var(--color-border)]
-          p-4 md:p-6
-        ">
+                <div className="
+                  bg-white
+                  rounded-2xl
+                  border border-[var(--color-border)]
+                  p-4 md:p-6
+                  overflow-hidden
+                ">
 
-          <div className="flex gap-6">
+         <div className="flex gap-6 min-w-0">
 
             {/* LEFT BANNER */}
             <div className="hidden md:block w-[260px] shrink-0">
@@ -131,7 +132,7 @@ export default function CategoryProductRow({
 
 
             {/* RIGHT PRODUCTS */}
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
 
               {/* Header */}
               <div className="flex justify-between items-center mb-4">
@@ -172,6 +173,9 @@ export default function CategoryProductRow({
                 <div className="
                   flex gap-4 overflow-x-auto
                   scrollbar-none
+                  w-full
+                  max-w-full
+                  touch-pan-x
                 ">
 
                   {products.slice(0, 8).map((p) => {
@@ -186,7 +190,7 @@ export default function CategoryProductRow({
                       <Link
                         key={p._id}
                         href={`/products/${p.slug}`}
-                        className="min-w-[180px] group"
+                        className="min-w-[150px] sm:min-w-[180px] group"
                       >
 
                         <div className="
@@ -205,8 +209,8 @@ export default function CategoryProductRow({
                               alt={p.name}
                               fill
                               className="
-                                object-contain
-                                group-hover:scale-105
+                                object-cover
+                                group-hover:scale-110
                                 transition duration-700
                               "
                             />

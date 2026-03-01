@@ -1,6 +1,6 @@
 
 ```
-AOMOZ BY MONIRA
+AomozByMonira-Clothing.Web-main
 ├─ backup.txt
 ├─ eslint.config.mjs
 ├─ jsconfig.json
@@ -23,7 +23,9 @@ AOMOZ BY MONIRA
 │  │  └─ ysl.png
 │  ├─ hero-saree.jpg
 │  ├─ salwar-banner.jpg
+│  ├─ salwar-kamiz.jpg
 │  ├─ saree-banner.jpg
+│  ├─ saree.jpg
 │  └─ videos
 │     └─ about.mp4
 ├─ README.md
@@ -87,6 +89,7 @@ AOMOZ BY MONIRA
    │  │  └─ page.js
    │  ├─ favicon.ico
    │  ├─ globals.css
+   │  ├─ icon.png
    │  ├─ layout.js
    │  ├─ login
    │  │  └─ page.js
@@ -122,7 +125,7 @@ AOMOZ BY MONIRA
    │  ├─ AppContext.js
    │  ├─ layout
    │  │  ├─ AboutSection.js
-   │  │  ├─ CategoryProductRow.jsx
+   │  │  ├─ CategoryProductRow.js
    │  │  ├─ CategoryShowcase.js
    │  │  ├─ Footer.js
    │  │  ├─ Header.js
