@@ -9,6 +9,7 @@ export const CartProvider = ({ children }) => {
   const { data: session, status } = useSession();
   const [cart, setCart] = useState([]);
 
+<<<<<<< HEAD
   // Load cart from localStorage on session change
   useEffect(() => {
     if (status === "loading") return;
@@ -32,6 +33,23 @@ export const CartProvider = ({ children }) => {
         : "cart_guest";
 
       localStorage.setItem(cartKey, JSON.stringify(cart));
+=======
+  useEffect(() => {
+    if (status === "loading") return;
+    if (typeof window !== "undefined" && session?.user?.email) {
+      const userCartKey = `cart_${session.user.email}`;
+      const saved = localStorage.getItem(userCartKey);
+      setCart(saved ? JSON.parse(saved) : []);
+    } else {
+      setCart([]);
+    }
+  }, [session, status]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && session?.user?.email) {
+      const userCartKey = `cart_${session.user.email}`;
+      localStorage.setItem(userCartKey, JSON.stringify(cart));
+>>>>>>> f3300f327d0f341b4adc5a8ea25fa5d740a3a0e3
     }
   }, [cart, session]);
 
@@ -50,6 +68,7 @@ export const CartProvider = ({ children }) => {
   };
 
   const addToCart = async (item) => {
+<<<<<<< HEAD
     // Redirect to login if not authenticated
     if (!session?.user) {
       toast.error("Please log in to add items to your cart");
@@ -64,6 +83,13 @@ export const CartProvider = ({ children }) => {
     setCart((prev) => {
       const exists = prev.find((i) => i._id === item._id);
 
+=======
+    const currentStock = await checkStock(item._id);
+    
+    setCart((prev) => {
+      const exists = prev.find((i) => i._id === item._id);
+      
+>>>>>>> f3300f327d0f341b4adc5a8ea25fa5d740a3a0e3
       if (exists) {
         const newQuantity = exists.quantity + 1;
         if (newQuantity > currentStock) {
@@ -74,11 +100,16 @@ export const CartProvider = ({ children }) => {
           i._id === item._id ? { ...i, quantity: newQuantity } : i
         );
       }
+<<<<<<< HEAD
 
+=======
+      
+>>>>>>> f3300f327d0f341b4adc5a8ea25fa5d740a3a0e3
       if (currentStock < 1) {
         toast.error(`${item.name} is out of stock`);
         return prev;
       }
+<<<<<<< HEAD
 
       // ✅ Fixed operator precedence bug: wrapped ternary in parentheses
       const cartItem = {
@@ -88,6 +119,16 @@ export const CartProvider = ({ children }) => {
         originalPrice: item.price,
       };
 
+=======
+      
+      const cartItem = {
+        ...item,
+        quantity: 1,
+        displayPrice: item.displayPrice || item.discountPrice > 0 ? item.discountPrice : item.price,
+        originalPrice: item.price
+      };
+      
+>>>>>>> f3300f327d0f341b4adc5a8ea25fa5d740a3a0e3
       return [...prev, cartItem];
     });
   };
@@ -108,7 +149,11 @@ export const CartProvider = ({ children }) => {
     if (!item) return;
 
     const currentStock = await checkStock(id);
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> f3300f327d0f341b4adc5a8ea25fa5d740a3a0e3
     if (quantity > currentStock) {
       toast.error(`Only ${currentStock} units available for ${item.name}`);
       return;
@@ -122,6 +167,7 @@ export const CartProvider = ({ children }) => {
   const getCartTotals = useCallback(() => {
     let subtotal = 0;
     let discountTotal = 0;
+<<<<<<< HEAD
 
     cart.forEach((item) => {
       const itemPrice = item.displayPrice || item.price;
@@ -130,11 +176,24 @@ export const CartProvider = ({ children }) => {
       discountTotal += (originalPrice - itemPrice) * item.quantity;
     });
 
+=======
+    
+    cart.forEach((item) => {
+      const itemPrice = item.displayPrice || item.price;
+      const originalPrice = item.originalPrice || item.price;
+      const itemSubtotal = itemPrice * item.quantity;
+      
+      subtotal += itemSubtotal;
+      discountTotal += (originalPrice - itemPrice) * item.quantity;
+    });
+    
+>>>>>>> f3300f327d0f341b4adc5a8ea25fa5d740a3a0e3
     return { subtotal, discountTotal, total: subtotal };
   }, [cart]);
 
   return (
     <CartContext.Provider
+<<<<<<< HEAD
       value={{
         cart,
         addToCart,
@@ -142,6 +201,15 @@ export const CartProvider = ({ children }) => {
         clearCart,
         updateQuantity,
         getCartTotals,
+=======
+      value={{ 
+        cart, 
+        addToCart, 
+        removeFromCart, 
+        clearCart, 
+        updateQuantity,
+        getCartTotals 
+>>>>>>> f3300f327d0f341b4adc5a8ea25fa5d740a3a0e3
       }}
     >
       {children}
@@ -149,4 +217,8 @@ export const CartProvider = ({ children }) => {
   );
 };
 
+<<<<<<< HEAD
 export const useCart = () => useContext(CartContext);
+=======
+export const useCart = () => useContext(CartContext);
+>>>>>>> f3300f327d0f341b4adc5a8ea25fa5d740a3a0e3
