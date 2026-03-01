@@ -8,12 +8,12 @@ export default function CategoryShowcase() {
   const categories = [
     {
       name: "Salwar Kamiz",
-      image: "/categories/salwar-kamiz.jpg",
+      image: "/salwar-kamiz.jpg",
       slug: "salwar-kamiz",
     },
     {
       name: "Saree",
-      image: "/categories/saree.jpg",
+      image: "/saree.jpg",
       slug: "saree",
     },
   ];
