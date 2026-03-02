@@ -30,6 +30,7 @@ export default function useProducts() {
     }));
   }, [searchParams]);
 
+  /* FETCH PRODUCTS */
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
@@ -42,14 +43,14 @@ export default function useProducts() {
       if (filters.sort) queryParams.append("sort", filters.sort);
 
       const url = queryParams.toString()
-        ? `/api/products?${queryParams}`
+        ? `/api/products?${queryParams.toString()}`
         : "/api/products";
 
       const res = await fetch(url);
       if (!res.ok) throw new Error();
 
-      setProducts(await res.json());
-
+      const data = await res.json();
+      setProducts(data);
     } catch {
       toast.error("Failed to fetch products");
     }
