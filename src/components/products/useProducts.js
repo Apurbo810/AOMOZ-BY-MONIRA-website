@@ -1,14 +1,12 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 
 let debounceTimer;
 
 export default function useProducts() {
-  const searchParams = useSearchParams();
-
   const [products, setProducts] = useState([]);
+
   const [filters, setFilters] = useState({
     gender: "",
     category: "",
@@ -16,23 +14,29 @@ export default function useProducts() {
     maxPrice: "",
     sort: "",
   });
+
   const [loading, setLoading] = useState(false);
 
-  /* ✅ READ CATEGORY FROM URL */
+  /* ✅ READ CATEGORY FROM URL SAFELY */
   useEffect(() => {
-    const categoryFromUrl = searchParams.get("category");
-    const genderFromUrl = searchParams.get("gender");
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const categoryFromUrl = params.get("category");
+      const genderFromUrl = params.get("gender");
 
-    setFilters((prev) => ({
-      ...prev,
-      category: categoryFromUrl || "",
-      gender: genderFromUrl || "",
-    }));
-  }, [searchParams]);
+      if (categoryFromUrl || genderFromUrl) {
+        setFilters((prev) => ({
+          ...prev,
+          category: categoryFromUrl || "",
+          gender: genderFromUrl || "",
+        }));
+      }
+    }
+  }, []);
 
-  /* FETCH PRODUCTS */
   const fetchProducts = useCallback(async () => {
     setLoading(true);
+
     try {
       const queryParams = new URLSearchParams();
 
@@ -43,21 +47,21 @@ export default function useProducts() {
       if (filters.sort) queryParams.append("sort", filters.sort);
 
       const url = queryParams.toString()
-        ? `/api/products?${queryParams.toString()}`
+        ? `/api/products?${queryParams}`
         : "/api/products";
 
       const res = await fetch(url);
       if (!res.ok) throw new Error();
 
-      const data = await res.json();
-      setProducts(data);
+      setProducts(await res.json());
+
     } catch {
       toast.error("Failed to fetch products");
     }
+
     setLoading(false);
   }, [filters]);
 
-  /* Debounce fetch */
   useEffect(() => {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(fetchProducts, 400);
