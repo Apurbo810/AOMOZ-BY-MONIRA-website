@@ -9,7 +9,7 @@ import { signIn, useSession } from "next-auth/react";
 
 const Register = () => {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -17,41 +17,42 @@ const Register = () => {
     }
   }, [status, router]);
 
-  const [name, setName] = useState("");
-  const [profileFile, setProfileFile] = useState(null);
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    password: "",
+    confirmPassword: "",
+  });
+
   const [loading, setLoading] = useState(false);
 
   const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
   const validateBangladeshiPhone = (phone) =>
     /^(?:\+8801|01)[3-9]\d{8}$/.test(phone);
 
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    if (!name) return toast.error("Name is required"), setLoading(false);
-    if (name.length < 3)
-      return toast.error("Name must be at least 3 characters"), setLoading(false);
+    const { name, email, phone, address, password, confirmPassword } = form;
 
-    if (!email) return toast.error("Email is required"), setLoading(false);
-    const cleanEmail = email.trim().toLowerCase();
+    if (!name || name.length < 3)
+      return toast.error("Enter a valid name"), setLoading(false);
 
     if (!validateEmail(email))
       return toast.error("Invalid email"), setLoading(false);
 
-    if (!phone) return toast.error("Phone number is required"), setLoading(false);
     if (!validateBangladeshiPhone(phone))
-      return toast.error("Invalid Bangladeshi phone number"), setLoading(false);
+      return toast.error("Invalid Bangladeshi phone"), setLoading(false);
 
-    if (!address) return toast.error("Address is required"), setLoading(false);
-
-    if (!password || !confirmPassword)
-      return toast.error("Both password fields are required"), setLoading(false);
+    if (!address)
+      return toast.error("Address is required"), setLoading(false);
 
     if (password.length < 6)
       return toast.error("Password must be at least 6 characters"), setLoading(false);
@@ -60,34 +61,15 @@ const Register = () => {
       return toast.error("Passwords do not match"), setLoading(false);
 
     try {
-      let profileImageUrl = "";
-
-      if (profileFile) {
-        const formData = new FormData();
-        formData.append("file", profileFile);
-
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        const uploadData = await uploadRes.json();
-        if (!uploadRes.ok)
-          throw new Error(uploadData.error || "Image upload failed");
-
-        profileImageUrl = uploadData.url;
-      }
-
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
-          email: cleanEmail,
+          email: email.trim().toLowerCase(),
           phone,
           address,
           password,
-          profileImage: profileImageUrl,
         }),
       });
 
@@ -105,7 +87,6 @@ const Register = () => {
   };
 
   const handleGoogleLogin = () => {
-    toast("Redirecting to Google...");
     signIn("google", { callbackUrl: "/" });
   };
 
@@ -115,136 +96,138 @@ const Register = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-primary)] px-4 relative overflow-hidden">
 
-      {/* Background glow */}
+      {/* Background Glow */}
       <div className="absolute w-[900px] h-[900px] bg-[var(--color-primary)]/10 blur-3xl rounded-full -top-40 left-1/2 -translate-x-1/2"></div>
 
       <Toaster position="top-center" />
 
       {/* Card */}
-      <div className="max-w-md w-full bg-white/95 backdrop-blur-xl p-10 rounded-3xl shadow-lg border border-gray-200 relative z-10">
+      <div className="max-w-lg w-full bg-white p-10 rounded-3xl shadow-xl border border-gray-200 relative z-10">
 
-        {/* Title */}
-        <h2 className="text-4xl font-extrabold text-center text-[var(--color-primary)] mb-8 tracking-wide">
+        <h2 className="text-3xl font-bold text-center text-[var(--color-primary)] mb-8">
           Create Your Account
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-5">
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Name
-              </label>
-
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full h-11 px-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
-                required
-              />
-            </div>
-
-            {/* Profile image */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Profile Picture
-              </label>
-
-              <input
-                type="file"
-                onChange={(e) => setProfileFile(e.target.files[0])}
-                className="w-full text-sm"
-              />
-            </div>
-
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Email
-              </label>
-
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-11 px-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
-                required
-              />
-            </div>
-
-            {/* Phone */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Phone
-              </label>
-
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full h-11 px-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
-                required
-              />
-            </div>
-
-            {/* Address */}
-            <div className="md:col-span-2">
-              <textarea
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="w-full border border-gray-300 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)] outline-none p-3"
-                required
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-11 px-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
-                required
-              />
-            </div>
-
-            {/* Confirm */}
-            <div>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full h-11 px-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)] outline-none"
-                required
-              />
-            </div>
-
+          {/* Name */}
+          <div>
+            <label className="text-sm font-medium text-gray-600">
+              Full Name
+            </label>
+            <input
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              className="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)] outline-none transition"
+              placeholder="Enter your full name"
+              required
+            />
           </div>
 
-          {/* Button */}
+          {/* Email */}
+          <div>
+            <label className="text-sm font-medium text-gray-600">
+              Email Address
+            </label>
+            <input
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              className="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)] outline-none transition"
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label className="text-sm font-medium text-gray-600">
+              Phone Number
+            </label>
+            <input
+              name="phone"
+              value={form.phone}
+              onChange={handleChange}
+              className="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)] outline-none transition"
+              placeholder="01XXXXXXXXX"
+              required
+            />
+          </div>
+
+          {/* Address */}
+          <div>
+            <label className="text-sm font-medium text-gray-600">
+              Full Address
+            </label>
+            <textarea
+              name="address"
+              value={form.address}
+              onChange={handleChange}
+              rows="3"
+              className="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)] outline-none transition resize-none"
+              placeholder="Enter your full address"
+              required
+            />
+          </div>
+
+          {/* Password */}
+          <div>
+            <label className="text-sm font-medium text-gray-600">
+              Password
+            </label>
+            <input
+              name="password"
+              type="password"
+              value={form.password}
+              onChange={handleChange}
+              className="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)] outline-none transition"
+              placeholder="Minimum 6 characters"
+              required
+            />
+          </div>
+
+          {/* Confirm Password */}
+          <div>
+            <label className="text-sm font-medium text-gray-600">
+              Confirm Password
+            </label>
+            <input
+              name="confirmPassword"
+              type="password"
+              value={form.confirmPassword}
+              onChange={handleChange}
+              className="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)] outline-none transition"
+              placeholder="Re-enter password"
+              required
+            />
+          </div>
+
+          {/* Register Button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full h-12 rounded-xl text-white font-semibold bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition"
+            className="w-full py-3 rounded-xl bg-[var(--color-primary)] text-white font-semibold hover:bg-[var(--color-primary-hover)] transition"
           >
-            {loading ? "Registering..." : "Register"}
+            {loading ? "Creating Account..." : "Register"}
           </button>
 
         </form>
 
-        {/* Google */}
+        {/* Divider */}
+        <div className="divider my-6">OR</div>
+
+        {/* Google Login */}
         <button
           onClick={handleGoogleLogin}
-          className="w-full mt-4 border border-gray-300 rounded-xl py-3 flex justify-center items-center gap-3 hover:border-[var(--color-primary)]"
+          className="w-full border border-gray-300 rounded-xl py-3 flex justify-center items-center gap-3 hover:border-[var(--color-primary)] transition"
         >
-          <FcGoogle size={24} />
+          <FcGoogle size={22} />
           Continue with Google
         </button>
 
-        <p className="mt-6 text-center">
+        <p className="mt-6 text-center text-sm">
           Already have an account?{" "}
           <Link href="/login" className="text-[var(--color-accent)] font-semibold">
             Login

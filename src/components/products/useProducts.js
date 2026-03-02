@@ -1,10 +1,13 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 
 let debounceTimer;
 
 export default function useProducts() {
+  const searchParams = useSearchParams();
+
   const [products, setProducts] = useState([]);
   const [filters, setFilters] = useState({
     gender: "",
@@ -15,10 +18,23 @@ export default function useProducts() {
   });
   const [loading, setLoading] = useState(false);
 
+  /* ✅ READ CATEGORY FROM URL */
+  useEffect(() => {
+    const categoryFromUrl = searchParams.get("category");
+    const genderFromUrl = searchParams.get("gender");
+
+    setFilters((prev) => ({
+      ...prev,
+      category: categoryFromUrl || "",
+      gender: genderFromUrl || "",
+    }));
+  }, [searchParams]);
+
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
       const queryParams = new URLSearchParams();
+
       if (filters.gender) queryParams.append("gender", filters.gender);
       if (filters.category) queryParams.append("category", filters.category);
       if (filters.minPrice) queryParams.append("minPrice", filters.minPrice);
@@ -31,13 +47,16 @@ export default function useProducts() {
 
       const res = await fetch(url);
       if (!res.ok) throw new Error();
+
       setProducts(await res.json());
+
     } catch {
       toast.error("Failed to fetch products");
     }
     setLoading(false);
   }, [filters]);
 
+  /* Debounce fetch */
   useEffect(() => {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(fetchProducts, 400);
