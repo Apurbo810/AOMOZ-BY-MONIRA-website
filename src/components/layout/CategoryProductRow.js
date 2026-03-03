@@ -11,6 +11,20 @@ const greatVibes = Great_Vibes({
   weight: "400",
 });
 
+function RowCardSkeleton() {
+  return (
+    <div className="flex-shrink-0 w-1/3 lg:w-1/4">
+      <div className="card bg-base-100 border border-[var(--color-border)] overflow-hidden">
+        <div className="relative h-[220px] skeleton" />
+        <div className="p-3 text-center">
+          <div className="h-4 w-3/4 mx-auto rounded skeleton" />
+          <div className="h-4 w-1/3 mx-auto mt-3 rounded skeleton" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function CategoryProductRow({
   title,
   banner,
@@ -118,8 +132,10 @@ export default function CategoryProductRow({
 
               {/* Loading */}
               {loading && (
-                <div className="text-gray-400 text-sm">
-                  Loading products...
+                <div className="flex gap-4 overflow-x-auto">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <RowCardSkeleton key={i} />
+                  ))}
                 </div>
               )}
 
@@ -168,6 +184,7 @@ export default function CategoryProductRow({
                                 src={image}
                                 alt={p.name}
                                 fill
+                                loading="lazy"
                                 className="object-contain"
                               />
                             </figure>

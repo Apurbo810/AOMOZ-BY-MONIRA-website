@@ -10,7 +10,10 @@ const greatVibes = Great_Vibes({
   weight: "400",
 });
 
-export default function ProductSection({ products = [] }) {
+export default function ProductSection({ products = [], loading = false }) {
+  const safeProducts = Array.isArray(products) ? products : [];
+  const showSkeletons = loading;
+
   return (
     <section className="bg-[var(--color-bg-primary)] py-20 px-4 relative overflow-hidden">
       <div className="absolute w-[700px] h-[700px] bg-[var(--color-primary)]/10 blur-3xl rounded-full left-1/2 -translate-x-1/2 -top-40"></div>
@@ -45,9 +48,27 @@ export default function ProductSection({ products = [] }) {
           snap-x snap-mandatory
           scrollbar-none
         ">
-          {(Array.isArray(products) ? products : [])
-            .slice(0, 9)
-            .map((p) => {
+          {(showSkeletons ? Array.from({ length: 6 }) : safeProducts.slice(0, 9))
+            .map((p, i) => {
+              if (!p) {
+                return (
+                  <div
+                    key={`skeleton-${i}`}
+                    className="
+                      min-w-[75%] sm:min-w-[60%] md:min-w-0
+                      bg-white rounded-2xl border border-gray-100 overflow-hidden
+                    "
+                  >
+                    <div className="relative w-full aspect-[3/4] skeleton" />
+                    <div className="p-7 text-center">
+                      <div className="h-3 w-20 mx-auto rounded skeleton" />
+                      <div className="h-7 w-1/2 mx-auto mt-4 rounded skeleton" />
+                      <div className="h-6 w-24 mx-auto mt-4 rounded skeleton" />
+                    </div>
+                  </div>
+                );
+              }
+
               const image =
                 p.image?.startsWith("http")
                   ? p.image
@@ -74,6 +95,7 @@ export default function ProductSection({ products = [] }) {
                       src={image}
                       alt={p.name}
                       fill
+                      loading="lazy"
                       className="
                         object-cover
                         transition-transform duration-700

@@ -15,6 +15,7 @@ export default function ProductCard({
 }) {
   const [selectedSize, setSelectedSize] = useState(null);
   const [hoverImage, setHoverImage] = useState(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const isAdmin = session?.user?.admin === true;
   const isCustomer = !isAdmin;
@@ -26,6 +27,7 @@ export default function ProductCard({
     if (p.images?.length > 0) {
       setHoverImage(p.images[0]);
     }
+    setImageLoaded(false);
   }, [p]);
 
   /* SIZE LOGIC PRESERVED */
@@ -85,6 +87,11 @@ export default function ProductCard({
 
   const mainImage = p.image;
   const secondImage = hoverImage || mainImage;
+  const imageSrc = hoverImage ? secondImage : mainImage;
+
+  useEffect(() => {
+    setImageLoaded(false);
+  }, [imageSrc]);
 
   return (
     <Link
@@ -116,15 +123,21 @@ export default function ProductCard({
           if (p.images?.length > 0) setHoverImage(p.images[0]);
         }}
       >
+        {!imageLoaded && (
+          <div className="absolute inset-0 skeleton z-[1]" aria-hidden="true" />
+        )}
         <Image
-          src={hoverImage ? secondImage : mainImage}
+          src={imageSrc}
           alt={p.name}
           fill
           sizes="(max-width: 768px) 100vw, 300px"
+          loading="lazy"
+          onLoad={() => setImageLoaded(true)}
           className="
             object-contain
             transition-transform duration-500
             group-hover:scale-105
+            z-[2]
           "
           priority={false}
         />
