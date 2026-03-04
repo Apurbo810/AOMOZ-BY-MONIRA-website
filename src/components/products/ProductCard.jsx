@@ -18,7 +18,7 @@ export default function ProductCard({
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const isAdmin = session?.user?.admin === true;
-  const isCustomer = !isAdmin;
+  const isCustomer = !isAdmin || adminPreview;
 
   useEffect(() => {
     if (p.hasSizes && p.sizes?.length > 0) {
@@ -160,7 +160,7 @@ export default function ProductCard({
             onClick={handleAddToCart}
             disabled={isOutOfStock}
             className="
-              absolute bottom-0 left-0 right-0
+              absolute bottom-0 left-0 right-0 z-10
               bg-[var(--color-primary)]
               hover:bg-[var(--color-primary-hover)]
               text-white font-semibold text-sm
@@ -174,8 +174,8 @@ export default function ProductCard({
         )}
 
         {/* ADMIN CONTROLS */}
-        {isAdmin && !adminPreview && (
-          <div className="absolute top-3 right-3 flex gap-2">
+        {isAdmin && (
+          <div className="absolute top-3 right-3 flex gap-2 z-[20]">
             <button
               onClick={handleEdit}
               className="
