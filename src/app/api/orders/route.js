@@ -77,12 +77,20 @@ export async function POST(req) {
       subtotal += itemSubtotal;
       discountTotal += itemDiscount * (item.quantity || 1);
       
-      orderItems.push({
-        ...item,
-        originalPrice: product.price,
-        discountPrice: itemPrice,
-        itemTotal: itemSubtotal
-      });
+        orderItems.push({
+          productId: product._id,
+          name: product.name,
+          slug: product.slug,
+          image: product.image,
+
+          price: itemPrice,
+          quantity: item.quantity || 1,
+
+          size: item.size || "Free",
+          color: item.color || "",
+
+          total: itemSubtotal
+        });
     }
 
     const total = subtotal;

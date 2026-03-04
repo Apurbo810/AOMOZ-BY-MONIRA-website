@@ -31,12 +31,11 @@ export default function CheckoutPage() {
   const [address, setAddress] =
     useState("");
 
-  const total =
-    cart.reduce(
-      (acc, item) =>
-        acc + item.price * item.quantity,
-      0
-    );
+        const total = cart.reduce(
+          (acc, item) =>
+            acc + (item.displayPrice || item.price) * item.quantity,
+          0
+        );
 
   const vat = total * 0.05;
 
@@ -67,7 +66,15 @@ export default function CheckoutPage() {
 
         order_id,
 
-        items: cart,
+          items: cart.map((item) => ({
+            _id: item._id,          // required for backend stock check
+            productId: item._id,    // required by Order schema
+            name: item.name,
+            image: item.image,
+            quantity: item.quantity,
+            price: item.price,
+            total: item.price * item.quantity
+          })),
 
         total: grandTotal,
 
