@@ -19,7 +19,7 @@
     "cors": "^2.8.5",
     "framer-motion": "^12.23.26",
     "mongoose": "^8.16.4",
-    "next": "^15.5.7",
+    "next": "15.5.9",
     "next-auth": "^4.24.11",
     "querystring": "^0.2.1",
     "react": "19.1.0",
