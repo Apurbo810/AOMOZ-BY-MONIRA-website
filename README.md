@@ -1,0 +1,138 @@
+
+   ```
+   AOMOZ-BY-MONIRA-website-main
+   ├─ backup.txt
+   ├─ eslint.config.mjs
+   ├─ jsconfig.json
+   ├─ netlify.toml
+   ├─ next.config.mjs
+   ├─ package-lock.json
+   ├─ package.json
+   ├─ postcss.config.mjs
+   ├─ public
+   │  ├─ AOMOZ BY MONIRA.png
+   │  ├─ bkash-qr.png
+   │  ├─ hero-saree.jpg
+   │  ├─ salwar-banner.jpg
+   │  ├─ salwar-kamiz.jpg
+   │  ├─ saree-banner.jpg
+   │  └─ saree.jpg
+   ├─ README.md
+   └─ src
+      ├─ app
+      │  ├─ about
+      │  │  └─ page.js
+      │  ├─ api
+      │  │  ├─ auth
+      │  │  │  └─ [...nextauth]
+      │  │  │     ├─ authOptions.js
+      │  │  │     └─ route.js
+      │  │  ├─ create-admin
+      │  │  │  └─ route.js
+      │  │  ├─ orders
+      │  │  │  └─ route.js
+      │  │  ├─ payment
+      │  │  │  ├─ bkash
+      │  │  │  │  ├─ callback
+      │  │  │  │  │  └─ route.js
+      │  │  │  │  ├─ create-payment
+      │  │  │  │  │  └─ route.js
+      │  │  │  │  ├─ execute-payment
+      │  │  │  │  │  └─ route.js
+      │  │  │  │  ├─ grant-token
+      │  │  │  │  │  └─ route.js
+      │  │  │  │  └─ query-payment
+      │  │  │  │     └─ route.js
+      │  │  │  ├─ cancel
+      │  │  │  │  └─ route.js
+      │  │  │  ├─ fail
+      │  │  │  │  └─ route.js
+      │  │  │  ├─ sslcommerz-payment
+      │  │  │  │  └─ route.js
+      │  │  │  └─ success
+      │  │  │     └─ route.js
+      │  │  ├─ products
+      │  │  │  ├─ route.js
+      │  │  │  └─ [slug]
+      │  │  │     └─ route.js
+      │  │  ├─ register
+      │  │  │  └─ route.js
+      │  │  ├─ stats
+      │  │  │  └─ route.js
+      │  │  ├─ upload
+      │  │  │  ├─ payment-proof
+      │  │  │  │  └─ route.js
+      │  │  │  └─ route.js
+      │  │  ├─ upload-menu
+      │  │  │  └─ route.js
+      │  │  ├─ user
+      │  │  │  └─ updateProfileImage
+      │  │  │     └─ route.js
+      │  │  └─ users
+      │  │     └─ route.js
+      │  ├─ cart
+      │  │  └─ page.js
+      │  ├─ checkout
+      │  │  └─ page.js
+      │  ├─ contact
+      │  │  └─ page.js
+      │  ├─ favicon.ico
+      │  ├─ globals.css
+      │  ├─ icon.png
+      │  ├─ layout.js
+      │  ├─ login
+      │  │  └─ page.js
+      │  ├─ models
+      │  │  ├─ Order.js
+      │  │  ├─ Product.js
+      │  │  └─ User.js
+      │  ├─ orders
+      │  │  └─ page.js
+      │  ├─ page.js
+      │  ├─ payment-cancel
+      │  │  └─ page.jsx
+      │  ├─ payment-fail
+      │  │  └─ page.jsx
+      │  ├─ payment-processing
+      │  │  ├─ page.js
+      │  │  └─ PaymentProcessingContent.js
+      │  ├─ payment-success
+      │  │  └─ page.jsx
+      │  ├─ products
+      │  │  ├─ loading.js
+      │  │  ├─ page.js
+      │  │  └─ [slug]
+      │  │     ├─ loading.js
+      │  │     └─ page.js
+      │  ├─ profile
+      │  │  └─ page.js
+      │  ├─ register
+      │  │  └─ page.js
+      │  ├─ stats
+      │  │  └─ page.js
+      │  └─ users
+      │     └─ page.js
+      ├─ components
+      │  ├─ AppContext.js
+      │  ├─ layout
+      │  │  ├─ AboutSection.js
+      │  │  ├─ CategoryProductRow.js
+      │  │  ├─ CategoryShowcase.js
+      │  │  ├─ Footer.js
+      │  │  ├─ Header.js
+      │  │  ├─ Hero.js
+      │  │  └─ products.js
+      │  └─ products
+      │     ├─ AdminProductForm.jsx
+      │     ├─ Pagination.jsx
+      │     ├─ ProductCard.jsx
+      │     ├─ ProductFilters.jsx
+      │     ├─ ProductGrid.jsx
+      │     └─ useProducts.js
+      ├─ context
+      │  └─ CartContext.js
+      └─ lib
+         ├─ cloudinary.js
+         └─ mongodb.js
+
+   ```
