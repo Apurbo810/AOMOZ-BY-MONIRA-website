@@ -62,13 +62,13 @@ export default function CheckoutPage() {
 
     try {
 
-      await axios.post("/api/orders", {
+     await axios.post("/api/orders", {
 
         order_id,
 
           items: cart.map((item) => ({
-            _id: item._id,          // required for backend stock check
-            productId: item._id,    // required by Order schema
+            _id: item._id,
+            productId: item._id,
             name: item.name,
             image: item.image,
             quantity: item.quantity,
@@ -78,7 +78,7 @@ export default function CheckoutPage() {
 
         total: grandTotal,
 
-        payment_method: "COD",
+        payment_method: paymentMethod === "online" ? "SSLCOMMERZ" : "COD",
 
         user_email: session.user.email,
 
@@ -93,6 +93,35 @@ export default function CheckoutPage() {
         createdAt: new Date(),
 
       });
+
+      if (paymentMethod === "online") {
+
+        const { data } = await axios.post(
+          "/api/payment/sslcommerz-payment",
+          {
+            amount: grandTotal,
+            customer_name: name,
+            customer_email: session.user.email,
+            customer_phone: phone,
+            customer_address: address,
+            order_id,
+          }
+        );
+
+        if (data.GatewayPageURL) {
+          // Don't clear the cart here — payment isn't confirmed yet.
+          // If the user cancels or the payment fails, they should still
+          // have their cart. The cart is only cleared on /payment-success
+          // once SSLCommerz confirms the transaction.
+          window.location.href = data.GatewayPageURL;
+          return;
+        }
+
+        toast.error("Could not start payment. Try again.");
+        setLoading(false);
+        return;
+
+      }
 
       clearCart();
 
@@ -209,15 +238,32 @@ export default function CheckoutPage() {
 
           </div>
 
-          {/* COD Button */}
-          <button
-            onClick={() =>
-              setPaymentMethod("cod")
-            }
-            className="w-full border-2 border-[var(--color-primary)] text-[var(--color-primary)] bg-white hover:bg-[var(--color-primary)] hover:text-white py-3 rounded-xl font-semibold transition"
-          >
-            Cash on Delivery
-          </button>
+        {/* Payment Method */}
+          <div className="grid grid-cols-2 gap-3">
+
+            <button
+              onClick={() => setPaymentMethod("cod")}
+              className={`border-2 py-3 rounded-xl font-semibold transition ${
+                paymentMethod === "cod"
+                  ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
+                  : "border-[var(--color-primary)] text-[var(--color-primary)] bg-white"
+              }`}
+            >
+              Cash on Delivery
+            </button>
+
+            <button
+              onClick={() => setPaymentMethod("online")}
+              className={`border-2 py-3 rounded-xl font-semibold transition ${
+                paymentMethod === "online"
+                  ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
+                  : "border-[var(--color-primary)] text-[var(--color-primary)] bg-white"
+              }`}
+            >
+              Online Payment
+            </button>
+
+          </div>
 
         </div>
 
