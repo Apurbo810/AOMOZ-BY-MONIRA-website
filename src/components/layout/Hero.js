@@ -1,116 +1,190 @@
 "use client";
 
-import Link from "next/link";
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronRight } from "lucide-react";
+
+const heroImages = [
+  "/hero-saree.jpg",
+  "/hero-saree-2.jpg",
+  "/hero-saree-3.jpg",
+];
 
 export default function HeroSection() {
-  const reveal = {
-    hidden: { opacity: 0, y: 24 },
-    visible: (i = 0) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.7,
-        delay: 0.12 * i,
-        ease: [0.22, 1, 0.36, 1],
-      },
-    }),
-  };
+  const [currentImage, setCurrentImage] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImage((prev) => (prev + 1) % heroImages.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <section
-      className="relative w-full 
-                 min-h-[85vh] lg:min-h-screen
-                 pt-28 lg:pt-36
-                 overflow-hidden"
-    >
-      {/* Background Image */}
-      <Image
-        src="/hero-saree.jpg"
-        alt="Luxury Saree"
-        fill
-        priority
-        className="object-cover object-[70%_20%] sm:object-[60%_30%] md:object-[center_30%] lg:object-[center_25%]"
-      />
-
-      {/* Luxury Gradient Overlay */}
-      {/* Mobile: top-to-bottom so the woman on the right stays visible */}
-      {/* Desktop: left-to-right to keep text readable */}
-      <div
-        className="absolute inset-0
-                   bg-gradient-to-b from-black/90 via-black/60 to-black/10
-                   md:bg-gradient-to-r md:from-black/95 md:via-black/75 md:to-black/20"
-      />
-
-      {/* Content Wrapper */}
-      <div className="relative z-10 h-full flex items-center">
-        <div className="w-full px-6 md:px-12 lg:px-24">
+    <section className="relative h-[100svh] w-full overflow-hidden bg-white">
+      {/* Background Slider */}
+        <AnimatePresence mode="wait">
           <motion.div
-            initial="hidden"
-            animate="visible"
-            className="max-w-2xl text-white"
+            key={currentImage}
+            className="absolute inset-0 h-full w-full"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1 }}
           >
-            <motion.p
-              variants={reveal}
-              custom={0}
-              className="uppercase tracking-[0.4em] text-sm text-[#D4AF37] mb-6"
-            >
-              New Arrival
-            </motion.p>
+            <Image
+              src={heroImages[currentImage]}
+              alt="Luxury Saree"
+              fill
+              sizes="100vw"
+              priority
+              className="object-cover object-[80%_10%]"
+            />
+          </motion.div>
+        </AnimatePresence>
 
-            <motion.h1
-              variants={reveal}
-              custom={1}
-              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-serif font-semibold leading-tight"
-            >
-              Timeless
-              <span className="text-[#D4AF37]"> Elegance</span>
-            </motion.h1>
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-black/10" />
 
-            <motion.h2
-              variants={reveal}
-              custom={2}
-              className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-serif font-light mt-3"
-            >
-              Redefined
-            </motion.h2>
+      {/* Green Glow */}
+      <div className="absolute left-0 top-0 h-full w-full bg-[radial-gradient(circle_at_left,#0f766e55,transparent_55%)]" />
 
-            <motion.p
-              variants={reveal}
-              custom={3}
-              className="mt-6 sm:mt-8 text-gray-300 text-base sm:text-lg md:text-xl leading-relaxed max-w-lg"
-            >
-              Discover handcrafted sarees, elegant dresses, and premium handbags
-              curated for women who define their own style.
-            </motion.p>
+      {/* Content */}
+      <div className="relative z-20 mx-auto flex h-full max-w-7xl items-center px-6 lg:px-10">
+        <div className="max-w-2xl">
+          <motion.span
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="inline-block rounded-full border border-emerald-300/30 bg-emerald-700/20 px-5 py-2 text-sm font-medium tracking-widest text-emerald-200 backdrop-blur-md"
+          >
+            PREMIUM ETHNIC COLLECTION
+          </motion.span>
 
-            <motion.div
-              variants={reveal}
-              custom={4}
-              className="mt-8 sm:mt-10 flex flex-wrap gap-4 sm:gap-5"
-            >
-              <Link
-                href="/products"
-                className="px-8 sm:px-10 py-3 sm:py-4 bg-[#D4AF37] text-black font-semibold
-                           rounded-md transition-all duration-300
-                           hover:bg-white hover:scale-105"
-              >
-                SHOP NOW
-              </Link>
+          <motion.h1
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mt-6 text-5xl font-bold leading-tight text-white md:text-7xl"
+          >
+            Elegance
+            <span className="block text-emerald-400">
+              Woven Into Every Thread
+            </span>
+          </motion.h1>
 
-              <Link
-                href="/products"
-                className="px-8 sm:px-10 py-3 sm:py-4 border border-white text-white
-                           rounded-md transition-all duration-300
-                           hover:bg-white hover:text-black"
-              >
-                EXPLORE
-              </Link>
-            </motion.div>
+          <motion.p
+            initial={{ opacity: 0, y: 35 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-6 max-w-xl text-lg leading-8 text-gray-200"
+          >
+            Discover our exclusive collection of premium Sarees and Salwar
+            Kameez designed to celebrate tradition with modern elegance.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 35 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="mt-10 flex flex-wrap gap-5"
+          >
+            <Link
+              href="/products"
+              className="group inline-flex items-center rounded-full bg-emerald-600 px-8 py-4 font-semibold text-white transition-all duration-300 hover:bg-emerald-700"
+            >
+              Shop Sarees
+              <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </Link>
+
+            <Link
+              href="/collections"
+              className="rounded-full border border-white/40 bg-white/10 px-8 py-4 font-semibold text-white backdrop-blur-md transition-all duration-300 hover:bg-white hover:text-emerald-700"
+            >
+              Explore Collection
+            </Link>
+          </motion.div>
+
+          {/* Features */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1 }}
+            className="mt-12 flex flex-wrap gap-8"
+          >
+            {[
+              "Premium Fabric",
+              "Authentic Design",
+              "Worldwide Shipping",
+            ].map((item) => (
+              <div key={item} className="flex items-center gap-3">
+                <div className="h-3 w-3 rounded-full bg-emerald-400" />
+                <span className="text-white">{item}</span>
+              </div>
+            ))}
           </motion.div>
         </div>
       </div>
+
+      {/* Image Indicators */}
+      <div className="absolute bottom-10 left-1/2 z-30 flex -translate-x-1/2 gap-3">
+        {heroImages.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentImage(index)}
+            className={`h-2 rounded-full transition-all duration-500 ${
+              currentImage === index
+                ? "w-12 bg-emerald-500"
+                : "w-3 bg-white/60 hover:bg-white"
+            }`}
+          />
+        ))}
+      </div>
+
+      {/* Right Glass Card */}
+      <motion.div
+        initial={{ opacity: 0, x: 80 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 1 }}
+        className="absolute bottom-14 right-10 hidden w-72 rounded-3xl border border-white/20 bg-white/10 p-6 text-white backdrop-blur-xl lg:block"
+      >
+        <p className="text-sm uppercase tracking-widest text-emerald-300">
+          New Arrival
+        </p>
+
+        <h3 className="mt-2 text-2xl font-bold">
+          Luxury Wedding Collection
+        </h3>
+
+        <p className="mt-3 text-sm text-gray-200">
+          Handcrafted designs made with premium fabrics and timeless artistry.
+        </p>
+
+        <Link
+          href="/new-arrivals"
+          className="mt-5 inline-flex items-center font-semibold text-emerald-300 hover:text-emerald-200"
+        >
+          View Collection
+          <ChevronRight className="ml-1 h-5 w-5" />
+        </Link>
+      </motion.div>
+
+      {/* Scroll Indicator */}
+      <motion.div
+        animate={{ y: [0, 10, 0] }}
+        transition={{ repeat: Infinity, duration: 1.6 }}
+        className="absolute bottom-6 right-6 hidden text-white lg:block"
+      >
+        <div className="flex flex-col items-center">
+          <span className="mb-2 text-xs tracking-[4px]">SCROLL</span>
+          <div className="flex h-12 w-7 justify-center rounded-full border border-white">
+            <div className="mt-2 h-3 w-1 rounded-full bg-white" />
+          </div>
+        </div>
+      </motion.div>
     </section>
   );
 }
