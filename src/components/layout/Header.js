@@ -5,6 +5,11 @@ import React, { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -77,35 +82,48 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* USER DROPDOWN - Desktop (when session exists) */}
-            {mounted  && session  && (
-              <div
-                className="relative text-sm"
-                onMouseEnter={() => setUserDropdownOpen(true)}
-                onMouseLeave={() => setUserDropdownOpen(false)}
-              >
-                <button className="font-semibold hover:text-[#D4AF37] transition py-2">
-                  {userName}
-                </button>
-                {userDropdownOpen && (
-                  <div className="
-                    absolute right-0 mt-2 w-48
-                    bg-white
-                    border border-gray-200
-                    rounded-xl shadow-xl
-                    backdrop-blur-sm
-                  ">
-                    <Link href="/profile" className="block px-4 py-3 hover:bg-gray-50 font-medium text-gray-800">Profile</Link>
-                    <Link href="/orders" className="block px-4 py-3 hover:bg-gray-50 font-medium text-gray-800">Orders</Link>
-                    <button
-                      onClick={() => signOut()}
-                      className="w-full text-left px-4 py-3 text-red-600 hover:bg-gray-50 font-medium"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
+            {/* USER POPOVER - Desktop (when session exists) */}
+            {mounted && session && (
+              <Popover open={userDropdownOpen} onOpenChange={setUserDropdownOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    className="text-sm font-semibold hover:text-[#D4AF37] transition py-2"
+                    onMouseEnter={() => setUserDropdownOpen(true)}
+                  >
+                    {userName}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="end"
+                  onMouseEnter={() => setUserDropdownOpen(true)}
+                  onMouseLeave={() => setUserDropdownOpen(false)}
+                  className="w-48 p-0 bg-white border border-gray-200 rounded-xl shadow-xl backdrop-blur-sm overflow-hidden"
+                >
+                  <Link
+                    href="/profile"
+                    onClick={() => setUserDropdownOpen(false)}
+                    className="block px-4 py-3 hover:bg-gray-50 font-medium text-gray-800"
+                  >
+                    Profile
+                  </Link>
+                  <Link
+                    href="/orders"
+                    onClick={() => setUserDropdownOpen(false)}
+                    className="block px-4 py-3 hover:bg-gray-50 font-medium text-gray-800"
+                  >
+                    Orders
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      signOut();
+                    }}
+                    className="w-full text-left px-4 py-3 text-red-600 hover:bg-gray-50 font-medium"
+                  >
+                    Logout
+                  </button>
+                </PopoverContent>
+              </Popover>
             )}
 
             {/* CART */}

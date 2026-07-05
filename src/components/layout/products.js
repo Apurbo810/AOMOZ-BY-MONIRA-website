@@ -47,9 +47,8 @@ export default function ProductSection({
       {/* Glow Background */}
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
-        whileInView={{ opacity: 1, scale: 1 }}
+        animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1 }}
-        viewport={{ once: true }}
         className="absolute w-[700px] h-[700px] bg-[var(--color-primary)]/10 blur-3xl rounded-full left-1/2 -translate-x-1/2 -top-40"
       />
 
@@ -57,9 +56,8 @@ export default function ProductSection({
         {/* Section Heading */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
           className="text-center mb-16"
         >
           <h2
@@ -90,8 +88,7 @@ export default function ProductSection({
         <motion.div
           variants={containerVariants}
           initial="hidden"
-          whileInView="show"
-          viewport={{ once: true }}
+          animate="show"
           className="
             flex md:grid
             md:grid-cols-2 lg:grid-cols-3
@@ -208,31 +205,24 @@ export default function ProductSection({
                       ৳ {p.price}
                     </p>
 
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      whileHover={{ opacity: 1 }}
-                      className="
-                        mt-6
-                        opacity-0 group-hover:opacity-100
-                        transition duration-300
-                      "
-                    >
+                    <div className="mt-6">
                       <div
                         className="
-                          inline-flex items-center gap-2
-                          px-5 py-2.5
+                          inline-flex items-center justify-center gap-2
+                          w-full sm:w-auto
+                          px-6 py-3
                           rounded-full
                           bg-[var(--color-primary)]
                           text-white
-                          text-sm
-                          hover:bg-[var(--color-accent)]
-                          transition
+                          text-sm font-semibold
+                          transition-colors duration-300
+                          group-hover:bg-[var(--color-accent)]
                         "
                       >
                         <FiShoppingCart size={16} />
                         Add to Cart
                       </div>
-                    </motion.div>
+                    </div>
                   </div>
                 </Link>
               </motion.div>
