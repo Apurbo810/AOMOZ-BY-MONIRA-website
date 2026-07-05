@@ -48,22 +48,22 @@ export default function HeroSection() {
   <Image
     src={heroMobileImages[currentImage]}
     fill
-    priority
-    sizes="100vw"
+    priority={currentImage === 0}
+    sizes="(max-width: 768px) 100vw"
     className="object-cover"
     alt="Luxury Saree"
   />
 </div>
 
 <div className="absolute inset-0 hidden md:block">
-  <Image
-    src={heroImages[currentImage]}
-    fill
-    priority
-    sizes="100vw"
-    className="object-cover object-[82%_10%]"
-    alt="Luxury Saree"
-  />
+<Image
+  src={heroImages[currentImage]}
+  fill
+  priority={currentImage === 0}
+  sizes="(max-width: 768px) 100vw, 100vw"
+  className="object-cover object-[82%_10%]"
+  alt="Luxury Saree"
+/>
 </div>
         </motion.div>
       </AnimatePresence>
@@ -128,12 +128,12 @@ lg:mx-0
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: .2 }}
-        className="inline-flex items-center rounded-full border border-emerald-400/30 bg-emerald-600/10 backdrop-blur-xl px-4 py-2"
+        transition={{ delay: 0.2 }}
+        className="hidden sm:inline-flex items-center rounded-full border border-emerald-400/30 bg-emerald-600/10 backdrop-blur-xl px-4 py-2"
       >
         <span className="mr-2 h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
 
-        <span className="text-[11px] sm:text-xs tracking-[0.3em] uppercase text-emerald-200">
+        <span className="text-xs tracking-[0.3em] uppercase text-emerald-200">
           Luxury Collection 2026
         </span>
       </motion.div>
