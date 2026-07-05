@@ -33,13 +33,17 @@ export default function RootLayout({ children }) {
         <Script id="strip-extension-attrs" strategy="beforeInteractive">
           {`
             (function () {
+              var blockedAttrs = [
+                "bis_register",
+                "bis_skin_checked"
+              ];
+
               function clean(el) {
                 if (!el || !(el instanceof Element)) return;
                 var attrs = Array.prototype.slice.call(el.attributes || []);
                 attrs.forEach(function (a) {
                   if (
-                    a.name === "bis_register" ||
-                    a.name === "bis_skin_checked" ||
+                    blockedAttrs.indexOf(a.name) !== -1 ||
                     /^__processed_/i.test(a.name) ||
                     /^data-bis/i.test(a.name) ||
                     /^bis_/i.test(a.name)
@@ -55,8 +59,46 @@ export default function RootLayout({ children }) {
                   root.querySelectorAll("*").forEach(clean);
                 }
               }
-              walk(document.documentElement);
-              walk(document.body);
+
+              function cleanDocument() {
+                walk(document.documentElement);
+                walk(document.body);
+              }
+
+              cleanDocument();
+
+              if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", cleanDocument, { once: true });
+              }
+
+              requestAnimationFrame(cleanDocument);
+              setTimeout(cleanDocument, 0);
+              setTimeout(cleanDocument, 50);
+              setTimeout(cleanDocument, 250);
+
+              var observer = new MutationObserver(function (mutations) {
+                mutations.forEach(function (mutation) {
+                  if (mutation.type === "attributes") {
+                    clean(mutation.target);
+                  }
+
+                  mutation.addedNodes.forEach(function (node) {
+                    if (node instanceof Element) {
+                      walk(node);
+                    }
+                  });
+                });
+              });
+
+              observer.observe(document.documentElement, {
+                attributes: true,
+                childList: true,
+                subtree: true
+              });
+
+              setTimeout(function () {
+                observer.disconnect();
+              }, 5000);
             })();
           `}
         </Script>

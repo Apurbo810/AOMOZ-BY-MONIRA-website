@@ -1,8 +1,13 @@
+import Image from "next/image";
+import Link from "next/link";
 import { FaFacebookF, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 
 export default function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer suppressHydrationWarning
+    <footer
+      suppressHydrationWarning
       className="
         w-full
         bg-[var(--color-primary)]
@@ -12,21 +17,23 @@ export default function Footer() {
       "
     >
       <div className="max-w-7xl mx-auto px-6 md:px-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
-
         {/* BRAND */}
         <div>
-          <img
+          <Image
             src="/AOMOZ BY MONIRA.png"
             className="h-12 mb-4 brightness-0 invert"
             alt="AOMOZ BY MONIRA"
+            width={180}
+            height={48}
           />
 
           <p className="opacity-80 text-sm leading-relaxed">
-            Discover elegance with our premium Saree and Salwar Kamiz collections.
-            Designed for modern women who value tradition and luxury.
+            Discover elegance with our premium Saree and Salwar Kamiz
+            collections. Designed for modern women who value tradition and
+            luxury.
           </p>
 
-          <a
+          <Link
             href="/products"
             className="
               inline-block mt-5
@@ -39,59 +46,73 @@ export default function Footer() {
             "
           >
             Explore Collection
-          </a>
+          </Link>
         </div>
 
         {/* SHOP */}
         <div>
-          <h3 className="text-white font-semibold mb-4 text-lg">
-            Shop
-          </h3>
+          <h3 className="text-white font-semibold mb-4 text-lg">Shop</h3>
 
           <ul className="space-y-2 text-sm opacity-90">
             <li>
-              <a href="/products" className="hover:text-[var(--color-accent)] transition">
+              <Link
+                href="/products"
+                className="hover:text-[var(--color-accent)] transition"
+              >
                 All Products
-              </a>
+              </Link>
             </li>
 
             <li>
-              <a href="/products?category=saree" className="hover:text-[var(--color-accent)] transition">
+              <Link
+                href="/products?category=saree"
+                className="hover:text-[var(--color-accent)] transition"
+              >
                 Saree Collection
-              </a>
+              </Link>
             </li>
 
             <li>
-              <a href="/products?category=salwar-kamiz" className="hover:text-[var(--color-accent)] transition">
+              <Link
+                href="/products?category=salwar-kamiz"
+                className="hover:text-[var(--color-accent)] transition"
+              >
                 Salwar Kamiz
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
 
         {/* COMPANY */}
         <div>
-          <h3 className="text-white font-semibold mb-4 text-lg">
-            Company
-          </h3>
+          <h3 className="text-white font-semibold mb-4 text-lg">Company</h3>
 
           <ul className="space-y-2 text-sm opacity-90">
             <li>
-              <a href="/about" className="hover:text-[var(--color-accent)] transition">
+              <Link
+                href="/about"
+                className="hover:text-[var(--color-accent)] transition"
+              >
                 About Us
-              </a>
+              </Link>
             </li>
 
             <li>
-              <a href="/contact" className="hover:text-[var(--color-accent)] transition">
+              <Link
+                href="/contact"
+                className="hover:text-[var(--color-accent)] transition"
+              >
                 Contact
-              </a>
+              </Link>
             </li>
 
             <li>
-              <a href="/register" className="hover:text-[var(--color-accent)] transition">
+              <Link
+                href="/register"
+                className="hover:text-[var(--color-accent)] transition"
+              >
                 Create Account
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
@@ -129,7 +150,6 @@ export default function Footer() {
 
           {/* SOCIAL */}
           <div className="flex gap-4 text-lg mt-5">
-
             <a
               href="#"
               className="
@@ -168,18 +188,14 @@ export default function Footer() {
             >
               <FaLinkedinIn />
             </a>
-
           </div>
-
         </div>
-
       </div>
 
       {/* COPYRIGHT */}
       <p className="text-center text-sm opacity-70 mt-12">
-        © {new Date().getFullYear()} AOMOZ BY MONIRA — All Rights Reserved.
+        © {currentYear} AOMOZ BY MONIRA - All Rights Reserved.
       </p>
-
     </footer>
   );
 }
