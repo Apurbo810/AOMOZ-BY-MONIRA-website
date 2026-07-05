@@ -11,6 +11,11 @@ const heroImages = [
   "/hero-saree-2.jpg",
   "/hero-saree-3.jpg",
 ];
+const heroMobileImages = [
+  "/hero-saree-mobile.jpg",
+  "/hero-saree-mobile-2.jpg",
+  "/hero-saree-mobile-3.jpg",
+];
 
 export default function HeroSection() {
   const [currentImage, setCurrentImage] = useState(0);
@@ -41,7 +46,7 @@ export default function HeroSection() {
         >
 <div className="absolute inset-0 md:hidden">
   <Image
-    src="/hero-saree-mobile.jpg"
+    src={heroMobileImages[currentImage]}
     fill
     priority
     sizes="100vw"
