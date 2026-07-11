@@ -8,25 +8,31 @@ export default function Pagination({
   endIndex = 0,
   totalItems = 0,
 }) {
-  if (totalPages <= 1) return null;
+  const safeTotalPages = totalPages || 0;
+  const safeCurrentPage = currentPage || 1;
+
+  // always show at least this many page slots, even with 0-1 real pages
+  const minVisiblePages = 5;
+  const displayTotalPages = Math.max(safeTotalPages, minVisiblePages);
 
   const safeGo = (page) => {
-    if (page < 1 || page > totalPages) return;
+    if (page < 1 || page > safeTotalPages) return; // only real pages are navigable
     goToPage(page);
   };
 
   const pages = [];
+  const siblingCount = 2;
 
-  for (let i = 1; i <= totalPages; i++) {
+  for (let i = 1; i <= displayTotalPages; i++) {
     if (
       i === 1 ||
-      i === totalPages ||
-      Math.abs(i - currentPage) <= 1
+      i === displayTotalPages ||
+      Math.abs(i - safeCurrentPage) <= siblingCount
     ) {
       pages.push(i);
     } else if (
-      i === currentPage - 2 ||
-      i === currentPage + 2
+      i === safeCurrentPage - (siblingCount + 1) ||
+      i === safeCurrentPage + (siblingCount + 1)
     ) {
       pages.push("dots-" + i);
     }
@@ -40,52 +46,59 @@ export default function Pagination({
 
         {/* PREVIOUS */}
         <button
-          onClick={() => safeGo(currentPage - 1)}
-          disabled={currentPage === 1}
+          onClick={() => safeGo(safeCurrentPage - 1)}
+          disabled={safeCurrentPage <= 1}
           className={`px-4 py-2 rounded-xl text-sm font-semibold transition shadow
             ${
-              currentPage === 1
+              safeCurrentPage <= 1
                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-red-600 text-white hover:bg-red-700"
+                : "bg-[var(--color-primary)] text-white hover:opacity-90"
             }`}
         >
           Prev
         </button>
 
         {/* PAGE NUMBERS */}
-        {pages.map((p, idx) =>
-          typeof p === "number" ? (
+        {pages.map((p, idx) => {
+          if (typeof p !== "number") {
+            return (
+              <span key={p + idx} className="px-1 text-gray-400 select-none">
+                …
+              </span>
+            );
+          }
+
+          const isDisabled = p > safeTotalPages;
+          const isActive = p === safeCurrentPage && !isDisabled;
+
+          return (
             <button
               key={p}
               onClick={() => safeGo(p)}
+              disabled={isDisabled}
               className={`w-10 h-10 rounded-xl text-sm font-semibold transition shadow
                 ${
-                  p === currentPage
-                    ? "bg-red-600 text-white"
-                    : "bg-white border border-gray-200 text-gray-700 hover:bg-red-50"
+                  isDisabled
+                    ? "bg-gray-100 text-gray-300 cursor-not-allowed shadow-none"
+                    : isActive
+                    ? "bg-[var(--color-primary)] text-white"
+                    : "bg-white border border-[var(--color-primary)]/20 text-gray-700 hover:bg-[var(--color-primary)]/10"
                 }`}
             >
               {p}
             </button>
-          ) : (
-            <span
-              key={p + idx}
-              className="px-1 text-gray-400 select-none"
-            >
-              …
-            </span>
-          )
-        )}
+          );
+        })}
 
         {/* NEXT */}
         <button
-          onClick={() => safeGo(currentPage + 1)}
-          disabled={currentPage === totalPages}
+          onClick={() => safeGo(safeCurrentPage + 1)}
+          disabled={safeCurrentPage >= safeTotalPages}
           className={`px-4 py-2 rounded-xl text-sm font-semibold transition shadow
             ${
-              currentPage === totalPages
+              safeCurrentPage >= safeTotalPages
                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-red-600 text-white hover:bg-red-700"
+                : "bg-[var(--color-primary)] text-white hover:opacity-90"
             }`}
         >
           Next
@@ -94,8 +107,8 @@ export default function Pagination({
 
       {/* INFO TEXT */}
       <div className="text-xs sm:text-sm text-gray-600 text-center">
-        Page <span className="font-semibold">{currentPage}</span> of{" "}
-        <span className="font-semibold">{totalPages}</span>
+        Page <span className="font-semibold">{safeCurrentPage}</span> of{" "}
+        <span className="font-semibold">{safeTotalPages || 1}</span>
         {totalItems > 0 && (
           <>
             {" "}• Showing{" "}

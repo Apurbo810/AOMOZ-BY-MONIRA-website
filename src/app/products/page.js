@@ -209,16 +209,14 @@
               />
 
               {/* PAGINATION */}
-              {totalPages > 1 && (
-                <div className="mt-14">
-                  <div className="w-full h-px bg-gradient-to-r from-transparent via-[var(--color-primary)]/20 to-transparent mb-8" />
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    goToPage={goToPage}
-                  />
-                </div>
-              )}
+<div className="mt-14">
+  <div className="w-full h-px bg-gradient-to-r from-transparent via-[var(--color-primary)]/20 to-transparent mb-8" />
+  <Pagination
+    currentPage={currentPage}
+    totalPages={totalPages}
+    goToPage={goToPage}
+  />
+</div>
 
             </section>
           </div>

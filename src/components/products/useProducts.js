@@ -1,10 +1,13 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 
 let debounceTimer;
 
 export default function useProducts() {
+  const searchParams = useSearchParams();
+
   const [products, setProducts] = useState([]);
 
   const [filters, setFilters] = useState({
@@ -17,22 +20,19 @@ export default function useProducts() {
 
   const [loading, setLoading] = useState(false);
 
-  /* ✅ READ CATEGORY FROM URL SAFELY */
+  /* ✅ SYNC CATEGORY/GENDER FROM URL — reruns whenever the query string changes,
+     not just on first mount, so clicking a navbar link while already on
+     /products actually updates the filter. */
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const categoryFromUrl = params.get("category");
-      const genderFromUrl = params.get("gender");
+    const categoryFromUrl = searchParams.get("category");
+    const genderFromUrl = searchParams.get("gender");
 
-      if (categoryFromUrl || genderFromUrl) {
-        setFilters((prev) => ({
-          ...prev,
-          category: categoryFromUrl || "",
-          gender: genderFromUrl || "",
-        }));
-      }
-    }
-  }, []);
+    setFilters((prev) => ({
+      ...prev,
+      category: categoryFromUrl || "",
+      gender: genderFromUrl || "",
+    }));
+  }, [searchParams]);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);

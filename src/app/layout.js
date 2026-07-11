@@ -5,6 +5,7 @@ import Providers from "@/components/AppContext";
 import { CartProvider } from "@/context/CartContext";
 import { Playfair_Display, Poppins } from "next/font/google";
 import Script from "next/script";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -118,6 +119,9 @@ export default function RootLayout({ children }) {
             </main>
 
             <Footer />
+
+            {/* Floating WhatsApp button — persists across every route */}
+            <WhatsAppButton />
           </CartProvider>
         </Providers>
       </body>
