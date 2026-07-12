@@ -5,6 +5,10 @@ import toast from "react-hot-toast";
 
 const CartContext = createContext();
 
+// A cart line is uniquely identified by product + size.
+// Non-sized products use "nosize" so they still get a stable key.
+const lineKey = (id, size) => `${id}_${size || "nosize"}`;
+
 export const CartProvider = ({ children }) => {
   const { data: session, status } = useSession();
   const [cart, setCart] = useState([]);
@@ -35,21 +39,47 @@ export const CartProvider = ({ children }) => {
     }
   }, [cart, session]);
 
-  const checkStock = async (productId) => {
+  /**
+   * Returns { stock, price, discountPrice } for a product, resolved
+   * against a specific size when the product is size-based.
+   */
+  const checkStock = async (productId, size = null) => {
     try {
       const res = await fetch(`/api/products?id=${productId}`);
-      if (res.ok) {
-        const product = await res.json();
-        return product.stock || 0;
+      if (!res.ok) return { stock: 0, price: 0, discountPrice: 0 };
+
+      const product = await res.json();
+
+      if (product.hasSizes && product.sizes?.length > 0) {
+        const sizeEntry = product.sizes.find((s) => s.size === size);
+
+        if (!sizeEntry) {
+          return { stock: 0, price: 0, discountPrice: 0 };
+        }
+
+        return {
+          stock: sizeEntry.stock || 0,
+          price: sizeEntry.price || 0,
+          discountPrice: sizeEntry.discountPrice || 0,
+        };
       }
-      return 0;
+
+      return {
+        stock: product.stock || 0,
+        price: product.price || 0,
+        discountPrice: product.discountPrice || 0,
+      };
     } catch (err) {
       console.error("Error checking stock:", err);
-      return 0;
+      return { stock: 0, price: 0, discountPrice: 0 };
     }
   };
 
-  const addToCart = async (item) => {
+  /**
+   * item: the product object (must include hasSizes/sizes if size-based)
+   * size: the size string the shopper picked (required if item.hasSizes)
+   */
+  const addToCart = async (item, size = null) => {
     // Redirect to login if not authenticated
     if (!session?.user) {
       toast.error("Please log in to add items to your cart");
@@ -59,63 +89,97 @@ export const CartProvider = ({ children }) => {
       return;
     }
 
-    const currentStock = await checkStock(item._id);
+    if (item.hasSizes && !size) {
+      toast.error("Please select a size");
+      return;
+    }
+
+    const key = lineKey(item._id, size);
+    const { stock: currentStock, price, discountPrice } = await checkStock(
+      item._id,
+      size
+    );
 
     setCart((prev) => {
-      const exists = prev.find((i) => i._id === item._id);
+      const exists = prev.find((i) => lineKey(i._id, i.size) === key);
 
       if (exists) {
         const newQuantity = exists.quantity + 1;
         if (newQuantity > currentStock) {
-          toast.error(`Only ${currentStock} units available for ${item.name}`);
+          toast.error(
+            `Only ${currentStock} units available for ${item.name}${
+              size ? ` (${size})` : ""
+            }`
+          );
           return prev;
         }
         return prev.map((i) =>
-          i._id === item._id ? { ...i, quantity: newQuantity } : i
+          lineKey(i._id, i.size) === key
+            ? { ...i, quantity: newQuantity }
+            : i
         );
       }
 
       if (currentStock < 1) {
-        toast.error(`${item.name} is out of stock`);
+        toast.error(
+          `${item.name}${size ? ` (${size})` : ""} is out of stock`
+        );
         return prev;
       }
 
-      // ✅ Fixed operator precedence bug: wrapped ternary in parentheses
+      const resolvedPrice = item.hasSizes ? price : item.price;
+      const resolvedDiscountPrice = item.hasSizes
+        ? discountPrice
+        : item.discountPrice;
+
       const cartItem = {
-        ...item,
+        _id: item._id,
+        name: item.name,
+        image: item.image,
+        size: size || null,
         quantity: 1,
-        displayPrice: item.displayPrice || (item.discountPrice > 0 ? item.discountPrice : item.price),
-        originalPrice: item.price,
+        price: resolvedPrice,
+        displayPrice:
+          resolvedDiscountPrice > 0 ? resolvedDiscountPrice : resolvedPrice,
+        originalPrice: resolvedPrice,
       };
 
       return [...prev, cartItem];
     });
   };
 
-  const removeFromCart = (id) => {
-    setCart((prev) => prev.filter((i) => i._id !== id));
+  const removeFromCart = (id, size = null) => {
+    const key = lineKey(id, size);
+    setCart((prev) => prev.filter((i) => lineKey(i._id, i.size) !== key));
   };
 
   const clearCart = () => setCart([]);
 
-  const updateQuantity = async (id, quantity) => {
+  const updateQuantity = async (id, quantity, size = null) => {
     if (quantity < 1) {
       toast.error("Quantity must be at least 1");
       return;
     }
 
-    const item = cart.find((i) => i._id === id);
+    const key = lineKey(id, size);
+    const item = cart.find((i) => lineKey(i._id, i.size) === key);
     if (!item) return;
 
-    const currentStock = await checkStock(id);
+    const { stock: currentStock } = await checkStock(id, size);
 
     if (quantity > currentStock) {
-      toast.error(`Only ${currentStock} units available for ${item.name}`);
+      toast.error(
+        `Only ${currentStock} units available for ${item.name}${
+          size ? ` (${size})` : ""
+        }`
+      );
       return;
     }
 
     setCart((prev) =>
-      prev.map((i) => (i._id === id ? { ...i, quantity } : i))
+      prev.map((i) =>
+        lineKey(i._id, i.size) === key ? { ...i, quantity } : i
+      )
     );
   };
 

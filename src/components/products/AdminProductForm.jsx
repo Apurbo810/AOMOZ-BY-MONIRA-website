@@ -4,6 +4,31 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 
+const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL", "Free"];
+
+const emptySizeEntry = (size) => ({
+  size,
+  price: "",
+  discountPrice: "",
+  discountPercentage: "",
+  stock: "",
+});
+
+const emptyForm = {
+  name: "",
+  image: "",
+  images: [],
+  price: "",
+  discountPrice: "",
+  discountPercentage: "",
+  category: "",
+  color: "",
+  description: "",
+  stock: "",
+  hasSizes: false,
+  sizes: [],
+};
+
 export default function AdminProductForm({
   session,
   form,
@@ -17,6 +42,9 @@ export default function AdminProductForm({
 
   const [uploading, setUploading] = useState(false);
 
+  const hasSizes = !!form.hasSizes;
+  const sizes = form.sizes || [];
+
   /* ---------------- CLOSE ---------------- */
 
   const closeModal = () => {
@@ -24,18 +52,7 @@ export default function AdminProductForm({
     setShowAddProduct(false);
     setEditingId(null);
 
-    setForm({
-      name: "",
-      image: "",
-      images: [],
-      price: "",
-      discountPrice: "",
-      discountPercentage: "",
-      category: "",
-      color: "",
-      description: "",
-      stock: "",
-    });
+    setForm({ ...emptyForm });
 
   };
 
@@ -133,10 +150,75 @@ export default function AdminProductForm({
 
   };
 
-  /* ---------------- AUTO DISCOUNT ---------------- */
+  /* ---------------- SIZES ---------------- */
+
+  const toggleHasSizes = () => {
+    setForm(prev => ({
+      ...prev,
+      hasSizes: !prev.hasSizes,
+      sizes: !prev.hasSizes ? (prev.sizes || []) : [],
+    }));
+  };
+
+  const toggleSize = (size) => {
+    setForm(prev => {
+      const exists = (prev.sizes || []).some(s => s.size === size);
+
+      const nextSizes = exists
+        ? prev.sizes.filter(s => s.size !== size)
+        : [...(prev.sizes || []), emptySizeEntry(size)];
+
+      return { ...prev, sizes: nextSizes };
+    });
+  };
+
+  const updateSizeField = (size, field, value) => {
+    setForm(prev => ({
+      ...prev,
+      sizes: prev.sizes.map(s =>
+        s.size === size ? { ...s, [field]: value } : s
+      ),
+    }));
+  };
+
+  /* Auto discount % per size row */
+  useEffect(() => {
+    if (!showAddProduct || !hasSizes) return;
+
+    setForm(prev => {
+      let changed = false;
+
+      const nextSizes = (prev.sizes || []).map(s => {
+        const price = Number(s.price);
+        const discountPrice = Number(s.discountPrice);
+
+        if (!price || !discountPrice || discountPrice >= price) {
+          if (s.discountPercentage !== "") {
+            changed = true;
+            return { ...s, discountPercentage: "" };
+          }
+          return s;
+        }
+
+        const percent = Math.round(((price - discountPrice) / price) * 100);
+
+        if (Number(s.discountPercentage) !== percent) {
+          changed = true;
+          return { ...s, discountPercentage: percent };
+        }
+
+        return s;
+      });
+
+      return changed ? { ...prev, sizes: nextSizes } : prev;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(sizes.map(s => [s.price, s.discountPrice]))]);
+
+  /* ---------------- AUTO DISCOUNT (flat price mode) ---------------- */
 
   useEffect(() => {
-    if (!showAddProduct) return;
+    if (!showAddProduct || hasSizes) return;
 
     const price = Number(form.price);
     const discountPrice = Number(form.discountPrice);
@@ -158,7 +240,7 @@ export default function AdminProductForm({
         discountPercentage: percent,
       }));
     }
-  }, [form.price, form.discountPrice, form.discountPercentage, setForm]);
+  }, [form.price, form.discountPrice, form.discountPercentage, hasSizes, setForm, showAddProduct]);
 
   if (!session?.user?.admin || !showAddProduct) return null;
 
@@ -172,17 +254,62 @@ export default function AdminProductForm({
     if (!form.image) return toast.error("Main image is required");
     if (!form.category) return toast.error("Category is required");
     if (!form.color?.trim()) return toast.error("Color is required");
-    if (!form.price || Number(form.price) <= 0) {
-      return toast.error("Valid price is required");
-    }
 
-    const payload = {
-      ...form,
-      price: Number(form.price),
-      discountPrice: Number(form.discountPrice) || 0,
-      discountPercentage: Number(form.discountPercentage) || 0,
-      stock: Number(form.stock) || 0,
-    };
+    let payload;
+
+    if (hasSizes) {
+
+      if (sizes.length === 0) {
+        return toast.error("Select at least one size");
+      }
+
+      const invalidSize = sizes.find(
+        (s) => !s.price || Number(s.price) <= 0
+      );
+
+      if (invalidSize) {
+        return toast.error(`Enter a valid price for size ${invalidSize.size}`);
+      }
+
+      payload = {
+        name: form.name,
+        image: form.image,
+        images: form.images || [],
+        category: form.category,
+        color: form.color,
+        description: form.description || "",
+        hasSizes: true,
+        sizes: sizes.map((s) => ({
+          size: s.size,
+          price: Number(s.price),
+          discountPrice: Number(s.discountPrice) || 0,
+          discountPercentage: Number(s.discountPercentage) || 0,
+          stock: Number(s.stock) || 0,
+        })),
+      };
+
+    } else {
+
+      if (!form.price || Number(form.price) <= 0) {
+        return toast.error("Valid price is required");
+      }
+
+      payload = {
+        name: form.name,
+        image: form.image,
+        images: form.images || [],
+        category: form.category,
+        color: form.color,
+        description: form.description || "",
+        hasSizes: false,
+        sizes: [],
+        price: Number(form.price),
+        discountPrice: Number(form.discountPrice) || 0,
+        discountPercentage: Number(form.discountPercentage) || 0,
+        stock: Number(form.stock) || 0,
+      };
+
+    }
 
     if (editingId) payload.id = editingId;
 
@@ -402,60 +529,210 @@ export default function AdminProductForm({
 
           </div>
 
-          {/* PRICE */}
+          {/* HAS SIZES TOGGLE */}
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="flex items-center justify-between border rounded-xl px-4 py-3">
 
-            <div>
-
-              <label>Price</label>
+            <label className="flex items-center gap-3 cursor-pointer select-none">
 
               <input
-                type="number"
-                value={form.price}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    price: e.target.value,
-                  })
-                }
-                className="w-full border rounded-xl px-3 py-2 mt-1"
+                type="checkbox"
+                checked={hasSizes}
+                onChange={toggleHasSizes}
+                className="w-5 h-5 accent-[var(--color-primary)]"
               />
 
-            </div>
+              <span className="font-semibold">
+                This product comes in multiple sizes
+              </span>
 
-            <div>
-
-              <label>Discount Price</label>
-
-              <input
-                type="number"
-                value={form.discountPrice}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    discountPrice: e.target.value,
-                  })
-                }
-                className="w-full border rounded-xl px-3 py-2 mt-1"
-              />
-
-            </div>
-
-            <div>
-
-              <label>Discount %</label>
-
-              <input
-                type="number"
-                value={form.discountPercentage}
-                disabled
-                className="w-full border rounded-xl px-3 py-2 mt-1 bg-gray-100"
-              />
-
-            </div>
+            </label>
 
           </div>
+
+          {/* SIZE-BASED PRICING */}
+
+          {hasSizes ? (
+
+            <div className="space-y-4">
+
+              <div>
+
+                <p className="font-semibold mb-2">Select sizes</p>
+
+                <div className="flex flex-wrap gap-2">
+
+                  {SIZE_OPTIONS.map((size) => {
+
+                    const active = sizes.some((s) => s.size === size);
+
+                    return (
+                      <button
+                        type="button"
+                        key={size}
+                        onClick={() => toggleSize(size)}
+                        className={`px-4 py-2 rounded-full border-2 text-sm font-semibold transition ${
+                          active
+                            ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
+                            : "border-gray-300 text-gray-600 hover:border-[var(--color-primary)]"
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    );
+
+                  })}
+
+                </div>
+
+              </div>
+
+              {sizes.map((s) => (
+
+                <div key={s.size} className="border rounded-xl p-4 space-y-3">
+
+                  <p className="font-bold text-[var(--color-primary)]">
+                    Size: {s.size}
+                  </p>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+
+                    <div>
+                      <label className="text-sm">Price</label>
+                      <input
+                        type="number"
+                        value={s.price}
+                        onChange={(e) =>
+                          updateSizeField(s.size, "price", e.target.value)
+                        }
+                        className="w-full border rounded-xl px-3 py-2 mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm">Stock</label>
+                      <input
+                        type="number"
+                        value={s.stock}
+                        onChange={(e) =>
+                          updateSizeField(s.size, "stock", e.target.value)
+                        }
+                        className="w-full border rounded-xl px-3 py-2 mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm">Discount Price</label>
+                      <input
+                        type="number"
+                        value={s.discountPrice}
+                        onChange={(e) =>
+                          updateSizeField(s.size, "discountPrice", e.target.value)
+                        }
+                        className="w-full border rounded-xl px-3 py-2 mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm">Discount %</label>
+                      <input
+                        type="number"
+                        value={s.discountPercentage}
+                        disabled
+                        className="w-full border rounded-xl px-3 py-2 mt-1 bg-gray-100"
+                      />
+                    </div>
+
+                  </div>
+
+                </div>
+
+              ))}
+
+            </div>
+
+          ) : (
+
+            <>
+
+              {/* PRICE */}
+
+              <div className="grid grid-cols-3 gap-4">
+
+                <div>
+
+                  <label>Price</label>
+
+                  <input
+                    type="number"
+                    value={form.price}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        price: e.target.value,
+                      })
+                    }
+                    className="w-full border rounded-xl px-3 py-2 mt-1"
+                  />
+
+                </div>
+
+                <div>
+
+                  <label>Discount Price</label>
+
+                  <input
+                    type="number"
+                    value={form.discountPrice}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        discountPrice: e.target.value,
+                      })
+                    }
+                    className="w-full border rounded-xl px-3 py-2 mt-1"
+                  />
+
+                </div>
+
+                <div>
+
+                  <label>Discount %</label>
+
+                  <input
+                    type="number"
+                    value={form.discountPercentage}
+                    disabled
+                    className="w-full border rounded-xl px-3 py-2 mt-1 bg-gray-100"
+                  />
+
+                </div>
+
+              </div>
+
+              {/* STOCK */}
+
+              <div>
+
+                <label>Stock Quantity</label>
+
+                <input
+                  type="number"
+                  value={form.stock}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      stock: e.target.value,
+                    })
+                  }
+                  className="w-full border rounded-xl px-3 py-2 mt-1"
+                />
+
+              </div>
+
+            </>
+
+          )}
 
           {/* CATEGORY + COLOR */}
 
@@ -499,26 +776,6 @@ export default function AdminProductForm({
               />
 
             </div>
-
-          </div>
-
-          {/* STOCK */}
-
-          <div>
-
-            <label>Stock Quantity</label>
-
-            <input
-              type="number"
-              value={form.stock}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  stock: e.target.value,
-                })
-              }
-              className="w-full border rounded-xl px-3 py-2 mt-1"
-            />
 
           </div>
 

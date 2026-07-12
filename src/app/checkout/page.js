@@ -31,11 +31,11 @@ export default function CheckoutPage() {
   const [address, setAddress] =
     useState("");
 
-        const total = cart.reduce(
-          (acc, item) =>
-            acc + (item.displayPrice || item.price) * item.quantity,
-          0
-        );
+  const total = cart.reduce(
+    (acc, item) =>
+      acc + (item.displayPrice || item.price) * item.quantity,
+    0
+  );
 
   const vat = total * 0.05;
 
@@ -66,15 +66,22 @@ export default function CheckoutPage() {
 
         order_id,
 
-          items: cart.map((item) => ({
-            _id: item._id,
-            productId: item._id,
-            name: item.name,
-            image: item.image,
-            quantity: item.quantity,
-            price: item.price,
-            total: item.price * item.quantity
-          })),
+          items: cart.map((item) => {
+
+            const itemPrice = item.displayPrice || item.price;
+
+            return {
+              _id: item._id,
+              productId: item._id,
+              name: item.name,
+              image: item.image,
+              size: item.size || null,
+              quantity: item.quantity,
+              price: itemPrice,
+              total: itemPrice * item.quantity,
+            };
+
+          }),
 
         total: grandTotal,
 
@@ -200,24 +207,34 @@ export default function CheckoutPage() {
               Order Summary
             </h3>
 
-            {cart.map((item) => (
+            {cart.map((item) => {
 
-              <div
-                key={item._id}
-                className="flex justify-between text-gray-600"
-              >
+              const itemPrice = item.displayPrice || item.price;
 
-                <span>
-                  {item.name} x {item.quantity}
-                </span>
+              return (
 
-                <span>
-                  ৳ {item.price * item.quantity}
-                </span>
+                <div
+                  key={`${item._id}_${item.size || "nosize"}`}
+                  className="flex justify-between text-gray-600"
+                >
 
-              </div>
+                  <span>
+                    {item.name}
+                    {item.size && (
+                      <span className="text-gray-400"> ({item.size})</span>
+                    )}
+                    {" "}x {item.quantity}
+                  </span>
 
-            ))}
+                  <span>
+                    ৳ {itemPrice * item.quantity}
+                  </span>
+
+                </div>
+
+              );
+
+            })}
 
           </div>
 

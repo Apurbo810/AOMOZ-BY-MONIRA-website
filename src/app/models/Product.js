@@ -1,6 +1,33 @@
 import mongoose, { Schema, model, models } from "mongoose";
 import slugify from "slugify";
 
+const SizeEntrySchema = new Schema(
+  {
+    size: {
+      type: String,
+      required: true,
+      enum: ["XS", "S", "M", "L", "XL", "XXL", "Free"],
+    },
+    price: {
+      type: Number,
+      required: true,
+    },
+    discountPrice: {
+      type: Number,
+      default: 0,
+    },
+    discountPercentage: {
+      type: Number,
+      default: 0,
+    },
+    stock: {
+      type: Number,
+      default: 0,
+    },
+  },
+  { _id: false }
+);
+
 const ProductSchema = new Schema(
   {
     /* Basic Info */
@@ -36,10 +63,7 @@ const ProductSchema = new Schema(
     category: {
       type: String,
       required: true,
-      enum: [
-        "saree",
-        "salwar-kamiz"
-      ],
+      enum: ["saree", "salwar-kamiz"],
     },
 
     /* Color */
@@ -48,13 +72,12 @@ const ProductSchema = new Schema(
       required: true,
     },
 
-    /* Optional multiple colors */
     colors: {
       type: [String],
       default: [],
     },
 
-    /* Price */
+    /* Flat pricing (used when hasSizes is false) */
     price: {
       type: Number,
       required: true,
@@ -70,17 +93,20 @@ const ProductSchema = new Schema(
       default: 0,
     },
 
-    /* Size */
-    sizes: {
-      type: [String],
-      enum: ["XS", "S", "M", "L", "XL", "XXL", "Free"],
-      default: ["Free"],
-    },
-
-    /* Stock */
     stock: {
       type: Number,
       default: 0,
+    },
+
+    /* Size-based pricing (used when hasSizes is true) */
+    hasSizes: {
+      type: Boolean,
+      default: false,
+    },
+
+    sizes: {
+      type: [SizeEntrySchema],
+      default: [],
     },
 
     /* Status */
@@ -110,24 +136,19 @@ const ProductSchema = new Schema(
       default: 0,
     },
 
-    /* Active */
     isActive: {
       type: Boolean,
       default: true,
     },
-
   },
   {
     timestamps: true,
   }
 );
 
-
 /* Auto slug */
 ProductSchema.pre("save", async function (next) {
-
   if (this.isModified("name") || this.isNew) {
-
     let baseSlug = slugify(this.name, {
       lower: true,
       strict: true,
@@ -154,9 +175,6 @@ ProductSchema.pre("save", async function (next) {
   next();
 });
 
-
-const Product =
-  models.Product ||
-  model("Product", ProductSchema);
+const Product = models.Product || model("Product", ProductSchema);
 
 export default Product;

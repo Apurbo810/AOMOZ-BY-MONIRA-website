@@ -20,50 +20,67 @@ export default function ProductCard({
   const isAdmin = session?.user?.admin === true;
   const isCustomer = !isAdmin || adminPreview;
 
+  const hasSizes = p.hasSizes && p.sizes?.length > 0;
+
   useEffect(() => {
-    if (p.hasSizes && p.sizes?.length > 0) {
-      setSelectedSize(p.sizes[0].ml);
+    // Only auto-select when there's exactly one size option.
+    // Otherwise leave it unselected so the shopper has to choose.
+    if (hasSizes && p.sizes.length === 1) {
+      setSelectedSize(p.sizes[0].size);
+    } else {
+      setSelectedSize(null);
     }
+
     if (p.images?.length > 0) {
       setHoverImage(p.images[0]);
+    } else {
+      setHoverImage(null);
     }
+
     setImageLoaded(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [p]);
 
-  /* SIZE LOGIC PRESERVED */
-  const hasSizes = p.hasSizes && p.sizes?.length > 0;
+  /* PRICE / STOCK RESOLUTION */
 
   let currentPrice = p.price;
   let currentDiscountPrice = p.discountPrice || 0;
   let currentDiscountPercent = p.discountPercentage || 0;
   let currentStock = p.stock || 0;
 
-  if (hasSizes && selectedSize) {
-    const sizeData = p.sizes.find((s) => s.ml === selectedSize);
+  if (hasSizes) {
+    const sizeData = p.sizes.find((s) => s.size === selectedSize);
+
     if (sizeData) {
       currentPrice = sizeData.price;
       currentDiscountPrice = sizeData.discountPrice || 0;
       currentDiscountPercent = sizeData.discountPercentage || 0;
       currentStock = sizeData.stock || 0;
+    } else {
+      // No size picked yet — nothing to display as a firm price/stock
+      currentPrice = null;
+      currentDiscountPrice = 0;
+      currentDiscountPercent = 0;
+      currentStock = 0;
     }
   }
 
   const hasDiscount = currentDiscountPrice > 0;
   const displayPrice = hasDiscount ? currentDiscountPrice : currentPrice;
-  const isOutOfStock = currentStock === 0;
+  const isOutOfStock = hasSizes ? currentStock === 0 : currentStock === 0;
 
   const handleAddToCart = (e) => {
     e.preventDefault(); // prevent Link navigation when clicking Add to Cart
     e.stopPropagation();
+
     if (!addToCart) return;
-    addToCart({
-      ...p,
-      selectedSize: hasSizes ? selectedSize : null,
-      price: currentPrice,
-      discountPrice: currentDiscountPrice,
-      displayPrice,
-      stock: currentStock,
-    });
+
+    if (hasSizes && !selectedSize) {
+      toast.error("Please select a size");
+      return;
+    }
+
+    addToCart(p, hasSizes ? selectedSize : null);
     toast.success(`${p.name} added to cart`);
   };
 
@@ -79,10 +96,10 @@ export default function ProductCard({
     onDelete?.(p._id);
   };
 
-  const handleSizeSelect = (e, ml) => {
+  const handleSizeSelect = (e, size) => {
     e.preventDefault();
     e.stopPropagation();
-    setSelectedSize(ml);
+    setSelectedSize(size);
   };
 
   const mainImage = p.image;
@@ -169,7 +186,11 @@ export default function ProductCard({
               transition
             "
           >
-            {isOutOfStock ? "Out of stock" : "Add to Cart"}
+            {isOutOfStock
+              ? "Out of stock"
+              : hasSizes && !selectedSize
+              ? "Select size"
+              : "Add to Cart"}
           </button>
         )}
 
@@ -215,37 +236,49 @@ export default function ProductCard({
 
         {/* SIZE SELECTOR */}
         {hasSizes && (
-          <div className="flex justify-center gap-2 mt-3">
-            {p.sizes.map((size) => (
-              <button
-                key={size.ml}
-                onClick={(e) => handleSizeSelect(e, size.ml)}
-                className={`
-                  text-xs px-3 py-1 rounded-full border
-                  transition
-                  ${
-                    selectedSize === size.ml
-                      ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
-                      : "border-gray-300 hover:border-[var(--color-primary)]"
-                  }
-                `}
-              >
-                {size.ml}
-              </button>
-            ))}
+          <div className="flex justify-center gap-2 mt-3 flex-wrap">
+            {p.sizes.map((size) => {
+              const sizeOutOfStock = (size.stock || 0) === 0;
+
+              return (
+                <button
+                  key={size.size}
+                  onClick={(e) => handleSizeSelect(e, size.size)}
+                  disabled={sizeOutOfStock}
+                  className={`
+                    text-xs px-3 py-1 rounded-full border
+                    transition
+                    ${
+                      selectedSize === size.size
+                        ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
+                        : "border-gray-300 hover:border-[var(--color-primary)]"
+                    }
+                    ${sizeOutOfStock ? "opacity-40 cursor-not-allowed line-through" : ""}
+                  `}
+                >
+                  {size.size}
+                </button>
+              );
+            })}
           </div>
         )}
 
         {/* PRICE */}
         <div className="mt-3 flex justify-center items-center gap-2">
-          {hasDiscount && (
-            <span className="text-gray-400 line-through text-sm">
-              ৳{currentPrice}
-            </span>
+          {displayPrice === null ? (
+            <span className="text-sm text-gray-400">Select a size</span>
+          ) : (
+            <>
+              {hasDiscount && (
+                <span className="text-gray-400 line-through text-sm">
+                  ৳{currentPrice}
+                </span>
+              )}
+              <span className="text-lg font-bold text-[var(--color-primary)]">
+                ৳{displayPrice}
+              </span>
+            </>
           )}
-          <span className="text-lg font-bold text-[var(--color-primary)]">
-            ৳{displayPrice}
-          </span>
         </div>
 
       </div>

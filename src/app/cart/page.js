@@ -8,6 +8,9 @@ import { FiPlus, FiMinus, FiShoppingBag, FiAlertCircle } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
+// Must match the lineKey logic in CartContext
+const lineKey = (id, size) => `${id}_${size || "nosize"}`;
+
 export default function CartPage() {
 
   const { cart, removeFromCart, clearCart, updateQuantity } = useCart();
@@ -27,34 +30,56 @@ export default function CartPage() {
 
       try {
 
-        const stockPromises = cart.map(async (item) => {
+        // Only need one fetch per unique product _id, even if multiple sizes are in cart
+        const uniqueIds = [...new Set(cart.map((item) => item._id))];
 
-          const res = await fetch(`/api/products?id=${item._id}`);
+        const productPromises = uniqueIds.map(async (id) => {
+
+          const res = await fetch(`/api/products?id=${id}`);
 
           if (res.ok) {
-
             const product = await res.json();
-
-            return {
-              id: item._id,
-              stock: product.stock || 0,
-            };
-
+            return { id, product };
           }
 
-          return {
-            id: item._id,
-            stock: 0,
-          };
+          return { id, product: null };
 
         });
 
-        const stocks = await Promise.all(stockPromises);
+        const results = await Promise.all(productPromises);
+
+        const productMap = {};
+
+        results.forEach(({ id, product }) => {
+          productMap[id] = product;
+        });
 
         const stockMap = {};
 
-        stocks.forEach((s) => {
-          stockMap[s.id] = s.stock;
+        cart.forEach((item) => {
+
+          const product = productMap[item._id];
+          const key = lineKey(item._id, item.size);
+
+          if (!product) {
+            stockMap[key] = 0;
+            return;
+          }
+
+          if (product.hasSizes && product.sizes?.length > 0) {
+
+            const sizeEntry = product.sizes.find(
+              (s) => s.size === item.size
+            );
+
+            stockMap[key] = sizeEntry?.stock || 0;
+
+          } else {
+
+            stockMap[key] = product.stock || 0;
+
+          }
+
         });
 
         setStockData(stockMap);
@@ -78,7 +103,7 @@ export default function CartPage() {
   const subtotal =
     cart.reduce(
       (acc, item) =>
-        acc + item.price * item.quantity,
+        acc + (item.displayPrice || item.price) * item.quantity,
       0
     );
 
@@ -91,7 +116,7 @@ export default function CartPage() {
     cart.some((item) => {
 
       const availableStock =
-        stockData[item._id] || 0;
+        stockData[lineKey(item._id, item.size)] || 0;
 
       return item.quantity >
         availableStock;
@@ -156,15 +181,30 @@ export default function CartPage() {
             {/* Items */}
             <div className="lg:col-span-2 space-y-4">
 
+              {hasStockIssue && (
+                <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
+                  <FiAlertCircle />
+                  <span>
+                    Some items in your cart exceed available stock. Please adjust quantities before checkout.
+                  </span>
+                </div>
+              )}
+
               {cart.map((item) => {
 
+                const key = lineKey(item._id, item.size);
+
                 const availableStock =
-                  stockData[item._id] || 0;
+                  stockData[key] || 0;
+
+                const itemPrice = item.displayPrice || item.price;
+
+                const exceedsStock = item.quantity > availableStock;
 
                 return (
 
                   <div
-                    key={item._id}
+                    key={key}
                     className="bg-white rounded-2xl border border-gray-200 p-6"
                   >
 
@@ -187,9 +227,22 @@ export default function CartPage() {
                           {item.name}
                         </h2>
 
-                        <p className="text-[var(--color-accent)] font-bold text-lg">
-                          ৳{item.price}
+                        {item.size && (
+                          <p className="text-sm text-gray-500 mt-1">
+                            Size: <span className="font-semibold text-gray-700">{item.size}</span>
+                          </p>
+                        )}
+
+                        <p className="text-[var(--color-accent)] font-bold text-lg mt-1">
+                          ৳{itemPrice}
                         </p>
+
+                        {exceedsStock && (
+                          <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                            <FiAlertCircle size={12} />
+                            Only {availableStock} available
+                          </p>
+                        )}
 
                         {/* Quantity */}
                         <div className="flex items-center gap-3 mt-4">
@@ -198,7 +251,8 @@ export default function CartPage() {
                             onClick={() =>
                               updateQuantity(
                                 item._id,
-                                item.quantity - 1
+                                item.quantity - 1,
+                                item.size
                               )
                             }
                             className="p-2 border rounded-lg hover:bg-gray-100"
@@ -214,7 +268,8 @@ export default function CartPage() {
                             onClick={() =>
                               updateQuantity(
                                 item._id,
-                                item.quantity + 1
+                                item.quantity + 1,
+                                item.size
                               )
                             }
                             className="p-2 border rounded-lg hover:bg-gray-100"
@@ -229,7 +284,7 @@ export default function CartPage() {
                       {/* Delete */}
                       <button
                         onClick={() =>
-                          removeFromCart(item._id)
+                          removeFromCart(item._id, item.size)
                         }
                         className="text-gray-400 hover:text-[var(--color-primary)]"
                       >
@@ -268,12 +323,21 @@ export default function CartPage() {
                 <span>৳{grandTotal}</span>
               </div>
 
-              <Link
-                href="/checkout"
-                className="block w-full text-center mt-6 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white py-3 rounded-xl font-bold"
-              >
-                Proceed to Checkout
-              </Link>
+              {hasStockIssue ? (
+                <button
+                  disabled
+                  className="block w-full text-center mt-6 bg-gray-300 text-white py-3 rounded-xl font-bold cursor-not-allowed"
+                >
+                  Resolve Stock Issues First
+                </button>
+              ) : (
+                <Link
+                  href="/checkout"
+                  className="block w-full text-center mt-6 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white py-3 rounded-xl font-bold"
+                >
+                  Proceed to Checkout
+                </Link>
+              )}
 
               <button
                 onClick={clearCart}

@@ -29,6 +29,7 @@ export default function ProductDetails() {
   const [activeImage, setActiveImage] = useState("");
   const [hoverImage, setHoverImage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selectedSize, setSelectedSize] = useState(null);
 
   const sliderRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -59,6 +60,13 @@ export default function ProductDetails() {
           ? data.product.images[0]
           : `/storage/${data.product.images[0]}`;
         setHoverImage(second);
+      }
+
+      // Auto-select first available size if only one option, otherwise leave unselected
+      if (data.product.hasSizes && data.product.sizes?.length === 1) {
+        setSelectedSize(data.product.sizes[0].size);
+      } else {
+        setSelectedSize(null);
       }
 
       setLoading(false);
@@ -114,8 +122,41 @@ export default function ProductDetails() {
       </div>
     );
 
-  const displayPrice = product.discountPrice > 0 ? product.discountPrice : product.price;
-  const hasDiscount = product.discountPrice > 0;
+  const hasSizes = product.hasSizes && product.sizes?.length > 0;
+
+  // Resolve the active size entry (if any) to drive price/stock display
+  const activeSizeEntry = hasSizes
+    ? product.sizes.find((s) => s.size === selectedSize)
+    : null;
+
+  const resolvedPrice = hasSizes
+    ? activeSizeEntry?.price ?? null
+    : product.price;
+
+  const resolvedDiscountPrice = hasSizes
+    ? activeSizeEntry?.discountPrice ?? 0
+    : product.discountPrice;
+
+  const resolvedStock = hasSizes
+    ? activeSizeEntry?.stock ?? 0
+    : product.stock;
+
+  const displayPrice =
+    resolvedDiscountPrice > 0 ? resolvedDiscountPrice : resolvedPrice;
+
+  const hasDiscount = resolvedDiscountPrice > 0;
+
+  const canAddToCart = hasSizes ? !!selectedSize && resolvedStock > 0 : resolvedStock > 0;
+
+  const handleAddToCart = () => {
+    if (hasSizes && !selectedSize) {
+      toast.error("Please select a size");
+      return;
+    }
+
+    addToCart(product, selectedSize);
+    toast.success("Added to cart");
+  };
 
   return (
     <div className="min-h-screen bg-[var(--color-bg-primary)] relative overflow-hidden">
@@ -215,19 +256,25 @@ export default function ProductDetails() {
 
             {/* Price */}
             <div className="mt-2 mb-6">
-              {hasDiscount && (
-                <p className="text-gray-400 line-through text-lg mb-1">৳ {product.price}</p>
+              {resolvedPrice === null ? (
+                <p className="text-gray-400 text-lg">Select a size to see price</p>
+              ) : (
+                <>
+                  {hasDiscount && (
+                    <p className="text-gray-400 line-through text-lg mb-1">৳ {resolvedPrice}</p>
+                  )}
+                  <div className="flex items-end gap-3">
+                    <p className="text-4xl font-bold text-[var(--color-primary)]">
+                      ৳ {displayPrice}
+                    </p>
+                    {hasDiscount && product.discountPercentage && (
+                      <span className="text-sm font-semibold bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1 rounded-full mb-1">
+                        {product.discountPercentage}% OFF
+                      </span>
+                    )}
+                  </div>
+                </>
               )}
-              <div className="flex items-end gap-3">
-                <p className="text-4xl font-bold text-[var(--color-primary)]">
-                  ৳ {displayPrice}
-                </p>
-                {hasDiscount && product.discountPercentage && (
-                  <span className="text-sm font-semibold bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-1 rounded-full mb-1">
-                    {product.discountPercentage}% OFF
-                  </span>
-                )}
-              </div>
             </div>
 
             {/* Divider */}
@@ -241,7 +288,7 @@ export default function ProductDetails() {
             )}
 
             {/* Category & Color chips */}
-            <div className="flex flex-wrap gap-3 mb-8">
+            <div className="flex flex-wrap gap-3 mb-6">
               {product.category && (
                 <span className="text-xs font-semibold tracking-widest uppercase px-4 py-2 bg-[var(--color-primary)]/8 text-[var(--color-primary)] rounded-full border border-[var(--color-primary)]/20">
                   {product.category}
@@ -252,24 +299,65 @@ export default function ProductDetails() {
                   {product.color}
                 </span>
               )}
-              {product.stock > 0 ? (
-                <span className="text-xs font-semibold tracking-widest uppercase px-4 py-2 bg-green-50 text-green-600 rounded-full border border-green-200">
-                  In Stock
-                </span>
-              ) : (
-                <span className="text-xs font-semibold tracking-widest uppercase px-4 py-2 bg-red-50 text-red-500 rounded-full border border-red-200">
-                  Out of Stock
-                </span>
-              )}
+              {!hasSizes &&
+                (product.stock > 0 ? (
+                  <span className="text-xs font-semibold tracking-widest uppercase px-4 py-2 bg-green-50 text-green-600 rounded-full border border-green-200">
+                    In Stock
+                  </span>
+                ) : (
+                  <span className="text-xs font-semibold tracking-widest uppercase px-4 py-2 bg-red-50 text-red-500 rounded-full border border-red-200">
+                    Out of Stock
+                  </span>
+                ))}
             </div>
+
+            {/* Size selector */}
+            {hasSizes && (
+              <div className="mb-8">
+                <p className="text-sm font-semibold text-gray-700 mb-3">
+                  Select Size
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {product.sizes.map((s) => {
+                    const isActive = selectedSize === s.size;
+                    const outOfStock = s.stock <= 0;
+
+                    return (
+                      <button
+                        key={s.size}
+                        disabled={outOfStock}
+                        onClick={() => setSelectedSize(s.size)}
+                        className={`
+                          relative px-5 py-2.5 rounded-2xl border-2 font-semibold text-sm
+                          transition-all duration-300
+                          ${
+                            isActive
+                              ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
+                              : "border-gray-300 text-gray-700 hover:border-[var(--color-primary)]"
+                          }
+                          ${outOfStock ? "opacity-40 cursor-not-allowed line-through" : ""}
+                        `}
+                      >
+                        {s.size}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {selectedSize && (
+                  <p className="text-xs text-gray-500 mt-3">
+                    {resolvedStock > 0
+                      ? `${resolvedStock} in stock`
+                      : "Out of stock for this size"}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Add to Cart */}
             <button
-              disabled={isAdmin}
-              onClick={() => {
-                addToCart({ ...product, quantity });
-                toast.success("Added to cart");
-              }}
+              disabled={isAdmin || !canAddToCart}
+              onClick={handleAddToCart}
               className="
                 group relative w-full py-4 rounded-3xl
                 bg-[var(--color-primary)] text-white
@@ -278,7 +366,7 @@ export default function ProductDetails() {
                 hover:shadow-xl hover:shadow-[var(--color-primary)]/40
                 hover:scale-[1.02] active:scale-[0.98]
                 transition-all duration-300
-                disabled:opacity-50 disabled:cursor-not-allowed
+                disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
                 flex items-center justify-center gap-3
                 overflow-hidden
               "
@@ -287,7 +375,13 @@ export default function ProductDetails() {
               <span className="absolute inset-0 w-full h-full bg-white/0 group-hover:bg-white/10 transition-all duration-300 rounded-3xl" />
               <FiShoppingCart className="text-xl relative z-10" />
               <span className="relative z-10">
-                {isAdmin ? "Admin Mode" : "Add to Cart"}
+                {isAdmin
+                  ? "Admin Mode"
+                  : hasSizes && !selectedSize
+                  ? "Select a Size"
+                  : !canAddToCart
+                  ? "Out of Stock"
+                  : "Add to Cart"}
               </span>
             </button>
 
