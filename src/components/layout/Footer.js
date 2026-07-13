@@ -63,13 +63,15 @@ export default function Footer() {
             transition={{ duration: 0.7 }}
             className="lg:col-span-4 lg:pr-8"
           >
+          <div className="relative w-[220px] h-[70px] mb-3">
             <Image
               src="/AOMOZ BY MONIRA.png"
-              className="h-10 mb-3 brightness-0 invert"
               alt="AOMOZ BY MONIRA"
-              width={180}
-              height={48}
+              fill
+              className="object-contain object-left brightness-0 invert"
+              priority
             />
+          </div>
 
             <p
               className="italic mb-5"
