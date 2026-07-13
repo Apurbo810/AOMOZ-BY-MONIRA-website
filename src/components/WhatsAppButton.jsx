@@ -1,94 +1,79 @@
 "use client";
 
-import { FaWhatsapp } from "react-icons/fa";
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { FaComments, FaWhatsapp, FaFacebookMessenger } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 
-/**
- * Floating WhatsApp button — shows on every page it's mounted on.
- * Mount this ONCE in app/layout.js (outside <main>) so it persists
- * across the whole app instead of adding it to individual pages.
- *
- * Usage in app/layout.js:
- *
- *   import WhatsAppButton from "@/components/WhatsAppButton";
- *
- *   export default function RootLayout({ children }) {
- *     return (
- *       <html lang="en">
- *         <body>
- *           {children}
- *           <WhatsAppButton />
- *         </body>
- *       </html>
- *     );
- *   }
- *
- * NOTE: positioned bottom-right. On mobile it's raised to bottom-36
- * (with extra clearance since the label adds height below the icon)
- * so it sits well above the products-page filter FAB (bottom-16
- * right-5, lg:hidden) without overlapping; on desktop it drops to
- * the standard bottom-right corner since the filter FAB doesn't
- * exist there.
- */
-
-// TODO: replace with your real WhatsApp number, country code first, no + or spaces
 const WHATSAPP_NUMBER = "8801XXXXXXXXX";
-const DEFAULT_MESSAGE = "Hi! I'd like to know more about your products.";
+const MESSENGER_LINK = "https://m.me/yourpage"; // Replace with your page
 
-export default function WhatsAppButton() {
-  const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+const DEFAULT_MESSAGE =
+  "Hi! I'd like to know more about your products.";
+
+export default function ChatButton() {
+  const [open, setOpen] = useState(false);
+
+  const whatsapp = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
     DEFAULT_MESSAGE
   )}`;
 
   return (
-    <motion.a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Chat with us on WhatsApp"
-      initial={{ opacity: 0, x: 24 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.6, delay: 0.4 }}
-      whileHover={{ y: -3 }}
-      whileTap={{ scale: 0.96 }}
-      className="
-        fixed z-[60]
-        bottom-36 right-5
-        lg:bottom-6 lg:right-6
-        flex flex-col items-center gap-1.5
-        group
-      "
-    >
-      {/* Icon with pulsing ring */}
-      <div className="relative">
-        <span className="absolute inset-0 rounded-full bg-[#25D366] opacity-40 animate-ping" />
-        <div
-          className="
-            relative w-14 h-14 rounded-full
-            bg-[#25D366]
-            flex items-center justify-center
-            shadow-[0_10px_30px_-6px_rgba(37,211,102,0.6)]
-            group-hover:bg-[#20bd5a]
-            transition-colors duration-300
-          "
-        >
-          <FaWhatsapp size={28} className="text-white" />
-        </div>
-      </div>
+    <div className="fixed bottom-6 right-6 z-[60] flex flex-col items-end gap-3">
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 15, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 15, scale: 0.9 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col gap-3"
+          >
+            {/* Messenger */}
+            <motion.a
+              whileHover={{ x: -4 }}
+              href={MESSENGER_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 bg-white rounded-full shadow-xl px-4 py-3"
+            >
+              <div className="w-11 h-11 rounded-full bg-[#0084FF] flex items-center justify-center">
+                <FaFacebookMessenger className="text-white text-xl" />
+              </div>
+              <span className="font-medium text-gray-700">
+                Messenger
+              </span>
+            </motion.a>
 
-      {/* Label */}
-      <span
-        className="
-          text-[11px] font-semibold uppercase tracking-[0.15em]
-          text-white bg-black backdrop-blur-sm
-          px-3 py-1 rounded-full
-          shadow-md
-          group-hover:bg-black/85
-          transition-colors duration-300
-        "
+            {/* WhatsApp */}
+            <motion.a
+              whileHover={{ x: -4 }}
+              href={whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 bg-white rounded-full shadow-xl px-4 py-3"
+            >
+              <div className="w-11 h-11 rounded-full bg-[#25D366] flex items-center justify-center">
+                <FaWhatsapp className="text-white text-xl" />
+              </div>
+              <span className="font-medium text-gray-700">
+                WhatsApp
+              </span>
+            </motion.a>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Main Chat Button */}
+      <motion.button
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setOpen(!open)}
+        className="relative w-16 h-16 rounded-full bg-[var(--color-accent)] text-black shadow-2xl flex items-center justify-center"
       >
-        WhatsApp
-      </span>
-    </motion.a>
+        <span className="absolute inset-0 rounded-full bg-[var(--color-accent)] opacity-30 animate-ping"></span>
+
+        <FaComments className="relative text-3xl" />
+      </motion.button>
+    </div>
   );
 }
